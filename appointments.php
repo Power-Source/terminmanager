@@ -564,8 +564,17 @@ if (!class_exists('Appointments')) {
 			if ( $message ) {
 				$to_put = '<b>['. date_i18n( $this->datetime_format, $this->local_time ) .']</b> '. $message;
 				// Prevent multiple messages with same text and same timestamp
-				if ( ! file_exists( $this->log_file ) || strpos( @file_get_contents( $this->log_file ), $to_put ) === false ) {
-					@file_put_contents( $this->log_file, $to_put . chr( 10 ). chr( 13 ), FILE_APPEND );
+				$should_write = true;
+				if ( file_exists( $this->log_file ) ) {
+					$size = @filesize( $this->log_file );
+					$offset = $size && $size > 8192 ? $size - 8192 : 0;
+					$tail = @file_get_contents( $this->log_file, false, null, $offset );
+					if ( $tail && strpos( $tail, $to_put ) !== false ) {
+						$should_write = false;
+					}
+				}
+				if ( $should_write ) {
+					@file_put_contents( $this->log_file, $to_put . chr( 10 ) . chr( 13 ), FILE_APPEND );
 				}
 			}
 		}

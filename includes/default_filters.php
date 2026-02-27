@@ -88,7 +88,7 @@ if ( ! (defined( 'APP_USE_LEGACY_MP_INTEGRATION' ) && APP_USE_LEGACY_MP_INTEGRAT
 		$app_ids = array();
 		foreach ( $order->mp_cart_info as $product_id => $product_detail ) {
 			foreach ( $product_detail as $var ) {
-				list($product_name, $app_id) = split( ':', $var['name'] );
+				list( $product_name, $app_id ) = explode( ':', $var['name'], 2 );
 				if ( ! empty( $app_id ) && is_numeric( $app_id ) ) { $app_ids[] = $app_id; }
 			}
 		}

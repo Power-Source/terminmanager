@@ -39,12 +39,13 @@ class Appointments_API_Logins {
 		}
 
 
-		$url = "https://graph.facebook.com/v2.4/me?fields=id,name,first_name,last_name,email,age_range,link,gender,picture,locale,verified&access_token=".$token;
+		$url = "https://graph.facebook.com/v2.4/me?fields=id,name,first_name,last_name,email,age_range,link,gender,picture,locale,verified&access_token=" . rawurlencode( $token );
 
 		$curl = curl_init();
 		curl_setopt( $curl, CURLOPT_URL, $url );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, true );
+		curl_setopt( $curl, CURLOPT_SSL_VERIFYHOST, 2 );
 		$response = curl_exec( $curl );
 		curl_close( $curl );
 

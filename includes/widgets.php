@@ -59,16 +59,22 @@ class Appointments_Widget_Services extends Appointments_Widget_Helper {
 	function content( $instance ) {
 
 		extract( $instance );
+		$number = isset( $number ) ? absint( $number ) : 0;
 
 		global $wpdb;
-		$results = $wpdb->get_results("SELECT * FROM " . $wpdb->prefix . "app_services" . " WHERE page >0 LIMIT ".$number." ");
+		$results = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}app_services WHERE page > 0 LIMIT %d",
+				$number
+			)
+		);
 
 		if ( $results ) {
 			echo '<ul>';
 			foreach ( $results as $result ) {
 				echo '<li>';
 
-				echo '<a href="'.get_permalink($result->page).'" >'. stripslashes( $result->name ) . '</a>';
+				echo '<a href="' . esc_url( get_permalink( $result->page ) ) . '">' . esc_html( stripslashes( $result->name ) ) . '</a>';
 
 				echo '</li>';
 			}

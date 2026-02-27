@@ -189,7 +189,7 @@ class App_Appointments_Google_Login {
 
 		// Start verifying
 		$page = wp_remote_get('https://www.googleapis.com/userinfo/v2/me', array(
-			'sslverify' => false,
+			'sslverify' => true,
 			'timeout' => 5,
 			'headers' => array(
 				'Authorization' => sprintf( 'Bearer %s', $token ),

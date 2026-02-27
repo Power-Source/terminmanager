@@ -148,7 +148,7 @@ class App_MP_Bridge_Legacy {
 		if ( !$this->is_app_mp_page( $product ) || !is_array( $var_names ) )
 			return $name;
 
-		list( $app_title, $app_id ) = split( ':', $name );
+		list( $app_title, $app_id ) = explode( ':', $name, 2 );
 		if ( $app_id ) {
 			$result = appointments_get_appointment( $app_id );
 			if ( $result ) {
@@ -175,7 +175,7 @@ class App_MP_Bridge_Legacy {
 				foreach( $product_detail as $var ) {
 					// Find variation = app id which should also be downloadable
 					if ( isset( $var['name'] ) && isset( $var['download'] ) ) {
-						list( $product_name, $app_id ) = split( ':', $var['name'] );
+						list( $product_name, $app_id ) = explode( ':', $var['name'], 2 );
 						$app_id = (int)trim( $app_id );
 						if ( appointments_update_appointment_status( $app_id, 'paid' ) ) {
 							do_action( 'app_mp_order_paid', $app_id, $order ); // FIRST do the action
@@ -302,7 +302,7 @@ class App_MP_Bridge_Legacy {
 		if (isset($_POST['update_cart_submit'])) {
 			if (isset($_POST['remove']) && is_array($_POST['remove'])) {
 				foreach ($_POST['remove'] as $pbid) {
-					list($bid, $product_id, $var_id) = split(':', $pbid);
+					list( $bid, $product_id, $var_id ) = explode( ':', $pbid, 3 );
 					$product = get_post( $product_id );
 					// Check if this is an app product page
 					if ( $this->is_app_mp_page( $product ) ) {

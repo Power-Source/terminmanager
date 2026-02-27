@@ -277,7 +277,7 @@ EO_MP_JS;
 
 		$thumbnail_id = false;
 		$table = appointments_get_table( 'services' );
-		$page_id = $wpdb->get_var( "SELECT 'page' from $table WHERE ID = $service" );
+		$page_id = $wpdb->get_var( $wpdb->prepare( "SELECT `page` FROM $table WHERE ID = %d", $service ) );
 
 		if ( $page_id ) {
 			$t = get_post_thumbnail_id( $page_id );
