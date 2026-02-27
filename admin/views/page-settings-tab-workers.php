@@ -24,17 +24,25 @@ global $appointments, $wpdb;
 
 <script type="text/javascript">
     jQuery( document ).ready( function( $ ) {
-        $( ".add_worker_multiple" ).multiselect( {
-            noneSelectedText: '<?php echo esc_js( __( 'Gewählte Services', 'appointments' ) ) ?>',
-            checkAllText: '<?php echo esc_js( __( 'Alle wählen', 'appointments' ) ) ?>',
-            uncheckAllText: '<?php echo esc_js( __( 'Alle abwählen', 'appointments' ) ) ?>',
-            selectedText: '<?php echo esc_js( __( '# ausgewählt', 'appointments' ) ) ?>',
-            selectedList: 5,
-            position: {
-                my: 'left bottom',
-                at: 'left top'
-            }
-        } );
+        // Initialize Choices.js for multiselect (replaces jQuery UI Multiselect)
+        if (typeof Choices !== 'undefined') {
+            document.querySelectorAll('.add_worker_multiple').forEach(function(selectElement) {
+                if (!selectElement._choices) {
+                    var choices = new Choices(selectElement, {
+                        removeItemButton: true,
+                        placeholderValue: '<?php echo esc_js( __( 'Gewählte Services', 'appointments' ) ) ?>',
+                        searchPlaceholderValue: '<?php echo esc_js( __( 'Suche...', 'appointments' ) ) ?>',
+                        noResultsText: '<?php echo esc_js( __( 'Keine Ergebnisse gefunden', 'appointments' ) ) ?>',
+                        itemSelectText: '<?php echo esc_js( __( 'Klicke zum Auswählen', 'appointments' ) ) ?>',
+                        maxItemText: function(maxItemCount) {
+                            return '<?php echo esc_js( __( 'Nur', 'appointments' ) ) ?> ' + maxItemCount + ' <?php echo esc_js( __( 'Werte können hinzugefügt werden', 'appointments' ) ) ?>';
+                        }
+                    });
+                    // Store reference for later access
+                    selectElement._choices = choices;
+                }
+            });
+        }
     } );
 </script>
 

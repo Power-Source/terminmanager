@@ -187,7 +187,7 @@ class Appointments_Admin {
 		wp_enqueue_style( 'jquery-datepick', $appointments->plugin_url . '/css/jquery.datepick.css', false, $appointments->version );
 		wp_enqueue_style( 'jquery-multiselect', $appointments->plugin_url . '/css/jquery.multiselect.css', false, $appointments->version );
 
-		wp_enqueue_style( 'custom-ligin-screen-jquery-switch-button', $appointments->plugin_url . '/assets/css/vendor/jquery.switch_button.css', array(), '1.12.1' );
+		wp_enqueue_style( 'custom-ligin-screen-jquery-switch-button', $appointments->plugin_url . '/assets/css/vendor/jquery.switch_button.css', array(), '2.0.0' );
 		do_action( 'app-admin-admin_styles' );
 	}
 
@@ -220,9 +220,14 @@ class Appointments_Admin {
 
 		_appointments_enqueue_jquery_ui_datepicker();
 		wp_enqueue_script( 'jquery-colorpicker', $appointments->plugin_url . '/js/colorpicker.js', array( 'jquery' ), $appointments->version );
-		wp_enqueue_script( 'app-multi-datepicker', appointments_plugin_url() . 'admin/js/admin-multidatepicker.js', array( 'jquery-ui-datepicker' ), appointments_get_db_version(), true );
+		// Flatpickr-based multi-datepicker (no jQuery UI dependency)
+		wp_enqueue_script( 'app-multi-datepicker', appointments_plugin_url() . 'admin/js/admin-multidatepicker.js', array( 'flatpickr' ), appointments_get_db_version(), true );
 		wp_enqueue_script( 'app-switch-button', appointments_plugin_url() . 'admin/js/switch-button.js', array(), appointments_get_db_version(), true );
-		wp_enqueue_script( 'jquery-multiselect', $appointments->plugin_url . '/includes/external/jquery-ui-multiselect-widget/src/jquery.multiselect.min.js', array( 'jquery-ui-core', 'jquery-ui-widget', 'jquery-ui-position' ), '2.0.1' );
+		
+		// Choices.js for multiselect (replaces jQuery UI Multiselect Widget)
+		wp_enqueue_script( 'choices-js', $appointments->plugin_url . '/assets/js/vendor/choices.min.js', array(), '10.2.0', true );
+		wp_enqueue_style( 'choices-js', $appointments->plugin_url . '/assets/css/vendor/choices.min.css', array(), '10.2.0' );
+		
 		// Make a locale check to update locale_error flag
 
 		if ( empty( $appointments->options['disable_js_check_admin'] ) ) {
@@ -230,9 +235,9 @@ class Appointments_Admin {
 		}
 
 		/**
-		 * Switch button
+		 * Switch button (Vanilla JS - no jQuery UI dependency)
 		 */
-		wp_enqueue_script( 'custom-ligin-screen-jquery-switch-button', $appointments->plugin_url.'/assets/js/vendor/jquery.switch_button.js', array( 'jquery', 'jquery-effects-core' ), '1.12.1', true );
+		wp_enqueue_script( 'custom-ligin-screen-jquery-switch-button', $appointments->plugin_url.'/assets/js/vendor/jquery.switch_button.js', array( 'jquery' ), '2.0.0', true );
 		$i18n = array(
 			'labels' => array(
 				'label_on' => __( 'an', 'appointments' ),

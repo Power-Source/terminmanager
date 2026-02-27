@@ -942,21 +942,22 @@ function _appointments_is_pro() {
 }
 
 function _appointments_enqueue_jquery_ui_datepicker() {
-	wp_enqueue_script( 'jquery-ui-datepicker' );
-	wp_enqueue_style( 'app-jquery-ui', appointments_plugin_url() . 'admin/css/jquery-ui/jquery-ui.min.css', array(), appointments_get_db_version() );
+	// Migrated from jQuery UI Datepicker to Flatpickr (no jQuery UI dependency)
+	wp_enqueue_script( 'flatpickr', appointments_plugin_url() . 'assets/js/vendor/flatpickr.min.js', array(), '4.6.13', true );
+	wp_enqueue_style( 'flatpickr', appointments_plugin_url() . 'assets/css/vendor/flatpickr.min.css', array(), '4.6.13' );
 
-	/**
- * add some inline styles
- */
+	// Add some custom styles for compatibility
 	$style = '';
-	$style .= '.ui-state-highlight a, .ui-widget-content .ui-state-highlight a, .ui-widget-header .ui-state-highlight a {background:#333;color:#fff}';
-	$style .= '.app-datepick .ui-datepicker-inline .ui-datepicker-group .ui-datepicker-calendar td { padding: 0; }';
-	wp_add_inline_style( 'app-jquery-ui', $style );
+	$style .= '.flatpickr-day.selected { background: #333; color: #fff; border-color: #333; }';
+	$style .= '.flatpickr-day.selected:hover { background: #555; border-color: #555; }';
+	$style .= '.app-datepick .flatpickr-calendar { box-shadow: 0 2px 5px rgba(0,0,0,0.1); }';
+	wp_add_inline_style( 'flatpickr', $style );
 
 	$i18n = array(
 		'weekStart' => appointments_week_start(),
+		'dateFormat' => 'Y-m-d',
 	);
-	wp_localize_script( 'jquery-ui-datepicker', 'AppointmentsDateSettings', $i18n );
+	wp_localize_script( 'flatpickr', 'AppointmentsDateSettings', $i18n );
 }
 
 /**

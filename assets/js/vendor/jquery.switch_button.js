@@ -1,306 +1,265 @@
 /**
- * jquery.switchButton.js v1.0
- * jQuery iPhone-like switch button
- * @author Olivier Lance <olivier.lance@sylights.com>
+ * switchButton.js v2.0
+ * Vanilla JS switch button (no jQuery UI dependency)
+ * Migrated from jQuery UI Widget to vanilla JavaScript
  *
- * Copyright (c) Olivier Lance - released under MIT License {{{
- *
- * Permission is hereby granted, free of charge, to any person
- * obtaining a copy of this software and associated documentation
- * files (the "Software"), to deal in the Software without
- * restriction, including without limitation the rights to use,
- * copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the
- * Software is furnished to do so, subject to the following
- * conditions:
-
- * The above copyright notice and this permission notice shall be
- * included in all copies or substantial portions of the Software.
-
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
- * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
- * OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
- * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
- * HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
- * WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
- * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
- * OTHER DEALINGS IN THE SOFTWARE.
-
- * }}}
+ * Copyright (c) Olivier Lance - released under MIT License
+ * Modified for Appointments+ to remove jQuery UI dependency
  */
 
-/*
- * Meant to be used on a <input type="checkbox">, this widget will replace the receiver element with an iPhone-style
- * switch button with two states: "on" and "off".
- * Labels of the states are customizable, as are their presence and position. The receiver element's "checked" attribute
- * is updated according to the state of the switch, so that it can be used in a <form>.
- *
- */
+(function(window) {
+    'use strict';
 
-(function($) {
+    /**
+     * SwitchButton Class
+     */
+    class SwitchButton {
+        constructor(element, options) {
+            this.element = element;
+            this.options = Object.assign({
+                checked: undefined,
+                show_labels: true,
+                labels_placement: 'both',
+                on_label: 'ON',
+                off_label: 'OFF',
+                width: 25,
+                height: 11,
+                button_width: 12,
+                clear: true,
+                clear_after: null,
+                on_callback: undefined,
+                off_callback: undefined
+            }, options);
 
-    $.widget("sylightsUI.switchButton", {
-
-        options: {
-            checked: undefined,			// State of the switch
-
-            show_labels: true,			// Should we show the on and off labels?
-            labels_placement: "both", 	// Position of the labels: "both", "left" or "right"
-            on_label: "ON",				// Text to be displayed when checked
-            off_label: "OFF",			// Text to be displayed when unchecked
-
-            width: 25,					// Width of the button in pixels
-            height: 11,					// Height of the button in pixels
-            button_width: 12,			// Width of the sliding part in pixels
-
-            clear: true,				// Should we insert a div with style="clear: both;" after the switch button?
-            clear_after: null,		    // Override the element after which the clearing div should be inserted (null > right after the button)
-            on_callback: undefined,		//callback function that will be executed after going to on state
-            off_callback: undefined		//callback function that will be executed after going to off state
-        },
-
-        _create: function() {
-            // Init the switch from the checkbox if no state was specified on creation
+            // Init the switch from the checkbox if no state was specified
             if (this.options.checked === undefined) {
-                this.options.checked = this.element.prop("checked");
+                this.options.checked = this.element.checked;
             }
 
-            this._initLayout();
-            this._initEvents();
-        },
+            this.init();
+        }
 
-        _initLayout: function() {
-            // Hide the receiver element
-            this.element.hide();
+        init() {
+            this.initLayout();
+            this.initEvents();
+        }
 
-            // Create our objects: two labels and the button
-            this.off_label = $("<span>").addClass("switch-button-label");
-            this.on_label = $("<span>").addClass("switch-button-label");
+        initLayout() {
+            // Hide the original checkbox
+            this.element.style.display = 'none';
 
-            this.button_bg = $("<div>").addClass("switch-button-background");
-            this.button = $("<div>").addClass("switch-button-button");
+            // Create DOM elements
+            this.offLabel = document.createElement('span');
+            this.offLabel.className = 'switch-button-label';
+            
+            this.onLabel = document.createElement('span');
+            this.onLabel.className = 'switch-button-label';
+            
+            this.buttonBg = document.createElement('div');
+            this.buttonBg.className = 'switch-button-background';
+            
+            this.button = document.createElement('div');
+            this.button.className = 'switch-button-button';
 
-            // Insert the objects into the DOM
-            this.off_label.insertAfter(this.element);
-            this.button_bg.insertAfter(this.off_label);
-            this.on_label.insertAfter(this.button_bg);
+            // Insert elements after the checkbox
+            this.element.parentNode.insertBefore(this.offLabel, this.element.nextSibling);
+            this.offLabel.parentNode.insertBefore(this.buttonBg, this.offLabel.nextSibling);
+            this.buttonBg.parentNode.insertBefore(this.onLabel, this.buttonBg.nextSibling);
+            this.buttonBg.appendChild(this.button);
 
-            this.button_bg.append(this.button);
-
-            // Insert a clearing element after the specified element if needed
-            if(this.options.clear)
-            {
-                if (this.options.clear_after === null) {
-                    this.options.clear_after = this.on_label;
-                }
-                $("<div>").css({
-                    clear: "left"
-                }).insertAfter(this.options.clear_after);
+            // Insert clearing div if needed
+            if (this.options.clear) {
+                const clearDiv = document.createElement('div');
+                clearDiv.style.clear = 'left';
+                const clearAfter = this.options.clear_after || this.onLabel;
+                clearAfter.parentNode.insertBefore(clearDiv, clearAfter.nextSibling);
             }
 
-            // Call refresh to update labels text and visibility
-            this._refresh();
+            // Update layout
+            this.refresh();
 
-            // Init labels and switch state
-            // This will animate all checked switches to the ON position when
-            // loading... this is intentional!
+            // Initialize state (with animation)
             this.options.checked = !this.options.checked;
-            this._toggleSwitch(true);
-        },
+            this.toggleSwitch(true);
+        }
 
-        _refresh: function() {
-            // Refresh labels display
+        refresh() {
+            // Update labels visibility
             if (this.options.show_labels) {
-                this.off_label.show();
-                this.on_label.show();
-            }
-            else {
-                this.off_label.hide();
-                this.on_label.hide();
-            }
-
-            // Move labels around depending on labels_placement option
-            switch(this.options.labels_placement) {
-                case "both":
-                {
-                    // Don't move anything if labels are already in place
-                    if(this.button_bg.prev() !== this.off_label || this.button_bg.next() !== this.on_label)
-                    {
-                        // Detach labels form DOM and place them correctly
-                        this.off_label.detach();
-                        this.on_label.detach();
-                        this.off_label.insertBefore(this.button_bg);
-                        this.on_label.insertAfter(this.button_bg);
-
-                        // Update label classes
-                        this.on_label.addClass(this.options.checked ? "on" : "off").removeClass(this.options.checked ? "off" : "on");
-                        this.off_label.addClass(this.options.checked ? "off" : "on").removeClass(this.options.checked ? "on" : "off");
-
-                    }
-                    break;
-                }
-
-                case "left":
-                {
-                    // Don't move anything if labels are already in place
-                    if(this.button_bg.prev() !== this.on_label || this.on_label.prev() !== this.off_label)
-                    {
-                        // Detach labels form DOM and place them correctly
-                        this.off_label.detach();
-                        this.on_label.detach();
-                        this.off_label.insertBefore(this.button_bg);
-                        this.on_label.insertBefore(this.button_bg);
-
-                        // update label classes
-                        this.on_label.addClass("on").removeClass("off");
-                        this.off_label.addClass("off").removeClass("on");
-                    }
-                    break;
-                }
-
-                case "right":
-                {
-                    // Don't move anything if labels are already in place
-                    if(this.button_bg.next() !== this.off_label || this.off_label.next() !== this.on_label)
-                    {
-                        // Detach labels form DOM and place them correctly
-                        this.off_label.detach();
-                        this.on_label.detach();
-                        this.off_label.insertAfter(this.button_bg);
-                        this.on_label.insertAfter(this.off_label);
-
-                        // update label classes
-                        this.on_label.addClass("on").removeClass("off");
-                        this.off_label.addClass("off").removeClass("on");
-                    }
-                    break;
-                }
-
+                this.offLabel.style.display = '';
+                this.onLabel.style.display = '';
+            } else {
+                this.offLabel.style.display = 'none';
+                this.onLabel.style.display = 'none';
             }
 
-            // Refresh labels texts
-            this.on_label.html(this.options.on_label);
-            this.off_label.html(this.options.off_label);
+            // Update labels text
+            this.onLabel.textContent = this.options.on_label;
+            this.offLabel.textContent = this.options.off_label;
 
-            // Refresh button's dimensions
-            this.button_bg.width(this.options.width);
-            this.button_bg.height(this.options.height);
-            this.button.width(this.options.button_width);
-            this.button.height(this.options.height);
-        },
+            // Update dimensions
+            this.buttonBg.style.width = this.options.width + 'px';
+            this.buttonBg.style.height = this.options.height + 'px';
+            this.button.style.width = this.options.button_width + 'px';
+            this.button.style.height = this.options.height + 'px';
+        }
 
-        _initEvents: function() {
-            var self = this;
-
-            // Toggle switch when the switch is clicked
-            this.button_bg.on('click', function(e) {
+        initEvents() {
+            // Toggle on click
+            this.buttonBg.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                self._toggleSwitch(false);
-                return false;
+                this.toggleSwitch(false);
             });
-            this.button.on('click', function(e) {
+
+            this.button.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                self._toggleSwitch(false);
-                return false;
+                this.toggleSwitch(false);
             });
 
-            // Set switch value when clicking labels
-            this.on_label.on('click', function(e) {
-                if (self.options.checked && self.options.labels_placement === "both") {
-                    return false;
+            // Label clicks
+            this.onLabel.addEventListener('click', (e) => {
+                if (this.options.checked && this.options.labels_placement === 'both') {
+                    return;
                 }
-
-                self._toggleSwitch(false);
-                return false;
+                this.toggleSwitch(false);
             });
 
-            this.off_label.on('click', function(e) {
-                if (!self.options.checked && self.options.labels_placement === "both") {
-                    return false;
+            this.offLabel.addEventListener('click', (e) => {
+                if (!this.options.checked && this.options.labels_placement === 'both') {
+                    return;
                 }
-
-                self._toggleSwitch(false);
-                return false;
+                this.toggleSwitch(false);
             });
+        }
 
-        },
-
-        _setOption: function(key, value) {
-            if (key === "checked") {
-                this._setChecked(value);
+        toggleSwitch(isInitializing) {
+            // Don't toggle if readonly or disabled
+            if (!isInitializing && (this.element.readOnly || this.element.disabled)) {
                 return;
             }
 
-            this.options[key] = value;
-            this._refresh();
-        },
+            this.options.checked = !this.options.checked;
+            
+            if (this.options.checked) {
+                // Update checkbox
+                this.element.checked = true;
+                this.element.dispatchEvent(new Event('change', { bubbles: true }));
 
-        _setChecked: function(value) {
+                // Calculate position
+                const targetLeft = this.options.width - this.options.button_width;
+
+                // Update labels
+                if (this.options.labels_placement === 'both') {
+                    this.offLabel.classList.remove('on');
+                    this.offLabel.classList.add('off');
+                    this.onLabel.classList.remove('off');
+                    this.onLabel.classList.add('on');
+                } else {
+                    this.offLabel.style.display = 'none';
+                    this.onLabel.style.display = '';
+                }
+                
+                this.buttonBg.classList.add('checked');
+                
+                // Animate
+                this.animate(this.button, { left: targetLeft }, 250);
+                
+                // Callback
+                if (typeof this.options.on_callback === 'function') {
+                    this.options.on_callback.call(this);
+                }
+            } else {
+                // Update checkbox
+                this.element.checked = false;
+                this.element.dispatchEvent(new Event('change', { bubbles: true }));
+
+                // Update labels
+                if (this.options.labels_placement === 'both') {
+                    this.offLabel.classList.remove('off');
+                    this.offLabel.classList.add('on');
+                    this.onLabel.classList.remove('on');
+                    this.onLabel.classList.add('off');
+                } else {
+                    this.offLabel.style.display = '';
+                    this.onLabel.style.display = 'none';
+                }
+                
+                this.buttonBg.classList.remove('checked');
+                
+                // Animate
+                this.animate(this.button, { left: -1 }, 250);
+                
+                // Callback
+                if (typeof this.options.off_callback === 'function') {
+                    this.options.off_callback.call(this);
+                }
+            }
+        }
+
+        animate(element, properties, duration) {
+            const start = performance.now();
+            const startLeft = parseInt(window.getComputedStyle(element).left) || -1;
+            const targetLeft = properties.left;
+            const change = targetLeft - startLeft;
+
+            const step = (timestamp) => {
+                const elapsed = timestamp - start;
+                const progress = Math.min(elapsed / duration, 1);
+                
+                // Easing function (easeInOutCubic)
+                const eased = progress < 0.5
+                    ? 4 * progress * progress * progress
+                    : 1 - Math.pow(-2 * progress + 2, 3) / 2;
+                
+                element.style.left = (startLeft + change * eased) + 'px';
+
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                }
+            };
+
+            requestAnimationFrame(step);
+        }
+
+        setOption(key, value) {
+            if (key === 'checked') {
+                this.setChecked(value);
+                return;
+            }
+            this.options[key] = value;
+            this.refresh();
+        }
+
+        setChecked(value) {
             if (value === this.options.checked) {
                 return;
             }
-
             this.options.checked = !value;
-            this._toggleSwitch(false);
-        },
-
-        _toggleSwitch: function(isInitializing) {
-        	// Don't toggle the switch if it is set to readonly or disabled, unless it is initializing and animating itself
-        	if( !isInitializing && (this.element.attr('readonly') == 'readonly' || this.element.prop('disabled')) )
-	        		return;
-
-            this.options.checked = !this.options.checked;
-            var newLeft = "";
-            if (this.options.checked) {
-                // Update the underlying checkbox state
-                this.element.prop("checked", true);
-                this.element.trigger('change');
-
-                var dLeft = this.options.width - this.options.button_width;
-                newLeft = "+=" + dLeft;
-
-                // Update labels states
-                if(this.options.labels_placement == "both")
-                {
-                    this.off_label.removeClass("on").addClass("off");
-                    this.on_label.removeClass("off").addClass("on");
-                }
-                else
-                {
-                    this.off_label.hide();
-                    this.on_label.show();
-                }
-                this.button_bg.addClass("checked");
-                //execute on state callback if its supplied
-                if(typeof this.options.on_callback === 'function') this.options.on_callback.call(this);
-            }
-            else {
-                // Update the underlying checkbox state
-                this.element.prop("checked", false);
-                this.element.trigger('change');
-                newLeft = "-1px";
-
-                // Update labels states
-                if(this.options.labels_placement == "both")
-                {
-                    this.off_label.removeClass("off").addClass("on");
-                    this.on_label.removeClass("on").addClass("off");
-                }
-                else
-                {
-                    this.off_label.show();
-                    this.on_label.hide();
-                }
-                this.button_bg.removeClass("checked");
-                //execute off state callback if its supplied
-                if(typeof this.options.off_callback === 'function') this.options.off_callback.call(this);
-            }
-            // Animate the switch
-            this.button.animate({ left: newLeft }, 250, "easeInOutCubic");
+            this.toggleSwitch(false);
         }
 
-    });
+        destroy() {
+            this.offLabel.remove();
+            this.onLabel.remove();
+            this.buttonBg.remove();
+            this.element.style.display = '';
+        }
+    }
 
-})(jQuery);
+    // jQuery plugin compatibility wrapper
+    if (window.jQuery) {
+        (function($) {
+            $.fn.switchButton = function(options) {
+                return this.each(function() {
+                    if (!this._switchButton) {
+                        this._switchButton = new SwitchButton(this, options);
+                    }
+                });
+            };
+        })(window.jQuery);
+    }
+
+    // Expose to window for non-jQuery usage
+    window.SwitchButton = SwitchButton;
+
+})(window);

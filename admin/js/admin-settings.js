@@ -177,25 +177,36 @@ jQuery( document ).ready( function( $ ) {
      *
      * @since 2.3.2
      */
-    if ( $.fn.slider ) {
-        $('div.app-ui-slider').each( function() {
-            var id = $(this).data('target-id');
-            if ( id ) {
-                var target = $('#'+id);
-                var value = target.val();
-                var max = $(this).data('max') || 100;
-                var min = $(this).data('min') || 0;
-                $(this).slider({
-                    value: value,
-                    min: min,
-                    max: max,
-                    slide: function( event, ui ) {
-                        target.val( ui.value );
-                    }
+    // HTML5 Range Slider (replaces jQuery UI Slider)
+    document.querySelectorAll('.app-range-slider input[type="range"]').forEach(function(slider) {
+        var targetId = slider.getAttribute('data-target-id');
+        if (targetId) {
+            var target = document.getElementById(targetId);
+            if (target) {
+                // Sync slider with number input
+                slider.value = target.value || slider.min;
+                
+                // Update number input when slider changes
+                slider.addEventListener('input', function() {
+                    target.value = this.value;
+                    // Update CSS variable for visual progress
+                    var percent = ((this.value - this.min) / (this.max - this.min)) * 100;
+                    this.style.setProperty('--slider-progress', percent + '%');
                 });
+                
+                // Update slider when number input changes
+                target.addEventListener('input', function() {
+                    slider.value = this.value;
+                    var percent = ((this.value - slider.min) / (slider.max - slider.min)) * 100;
+                    slider.style.setProperty('--slider-progress', percent + '%');
+                });
+                
+                // Initialize progress bar
+                var percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                slider.style.setProperty('--slider-progress', percent + '%');
             }
-        });
-    }
+        }
+    });
 
     /**
      * add tab to request "hidden-columns".

@@ -88,8 +88,8 @@ class Appointments_Integration_BuddyPress {
 			$this->_bp_script = "$('.app-datepick').each( function() { new AppDatepicker( $(this) ); });";
 			wp_enqueue_script( 'appointments-admin', appointments_plugin_url()  . '/admin/js/admin.js', array( 'jquery' ), $appointments->version );
 
-			wp_enqueue_script( 'app-multi-datepicker', appointments_plugin_url() . 'admin/js/admin-multidatepicker.js', array( 'jquery-ui-datepicker' ), appointments_get_db_version(), true );
-			wp_enqueue_style( 'app-jquery-ui', appointments_plugin_url() . 'admin/css/jquery-ui/jquery-ui.min.css', array(), appointments_get_db_version() );
+			// Flatpickr-based multi-datepicker (no jQuery UI dependency)
+			wp_enqueue_script( 'app-multi-datepicker', appointments_plugin_url() . 'admin/js/admin-multidatepicker.js', array( 'flatpickr' ), appointments_get_db_version(), true );
 
 		}
 	}

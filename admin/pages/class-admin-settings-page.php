@@ -79,8 +79,9 @@ class Appointments_Admin_Settings_Page {
 			}
 			$content .= implode( ' | ', $links );
 			$content .= '</ul>';
-			wp_enqueue_script( 'app-settings', appointments_plugin_url() . 'admin/js/admin-settings.js', array( 'jquery', 'jquery-ui-slider' ), appointments_get_db_version(), true );
+			wp_enqueue_script( 'app-settings', appointments_plugin_url() . 'admin/js/admin-settings.js', array( 'jquery' ), appointments_get_db_version(), true );
 			wp_enqueue_script( 'app-settings-section', appointments_plugin_url() . 'admin/js/admin-settings-sections.js', array( 'app-settings' ), appointments_get_db_version(), true );
+			wp_enqueue_style( 'app-range-slider', appointments_plugin_url() . 'admin/css/app-range-slider.css', array(), appointments_get_db_version() );
 			$appointments = appointments();
 			$classes = $appointments->get_classes();
 			$presets = array();

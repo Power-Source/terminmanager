@@ -175,13 +175,22 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
     };
 
     /**
-     * Initializes datepickers
+     * Initializes datepickers (Flatpickr - no jQuery UI)
      */
     AppointmentsList.prototype.initDatepicker = function() {
-        $( '.datepicker' ).datepicker({
-            dateFormat: 'yy-mm-dd',
-            firstDay: AppointmentsDateSettings.weekStart
-        });
+        if (typeof flatpickr !== 'undefined') {
+            document.querySelectorAll('.datepicker').forEach(function(el) {
+                if (!el._flatpickr) {
+                    flatpickr(el, {
+                        dateFormat: 'Y-m-d',
+                        locale: {
+                            firstDayOfWeek: AppointmentsDateSettings.weekStart || 0
+                        },
+                        allowInput: true
+                    });
+                }
+            });
+        }
     };
     
     /**

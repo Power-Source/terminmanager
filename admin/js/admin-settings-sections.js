@@ -62,12 +62,20 @@ jQuery(document).ready( function( $ ) {
                 $('#service-page',     section ).val( response.data.page );
                 $('#service-price',    section ).val( response.data.price );
                 /**
-                 * udpate slider
+                 * update slider (HTML5 range input)
                  *
                  * @since 2.3.2
                  */
-                if ( $.fn.slider ) {
-                    $('#service-capacity-slider-edit').slider( 'option', 'value', response.data.capacity );
+                var slider = document.getElementById('service-capacity-slider-edit');
+                if (slider) {
+                    slider.value = response.data.capacity;
+                    var target = document.getElementById('service-capacity');
+                    if (target) {
+                        target.value = response.data.capacity;
+                        // Update visual progress
+                        var percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                        slider.style.setProperty('--slider-progress', percent + '%');
+                    }
                 }
                 /**
                  * PRO: service_padding
@@ -162,9 +170,21 @@ jQuery(document).ready( function( $ ) {
                     $('#services_provided option[value="'+val+'"]', section ).prop( 'selected', true );
                 });
                 /**
-                 * update multiselect
+                 * refresh multiselect (Choices.js - replaces jQuery UI Multiselect)
                  */
-                $('.add_worker_multiple').multiselect( 'refresh' );
+                var selectElements = document.querySelectorAll('.add_worker_multiple');
+                selectElements.forEach(function(selectElement) {
+                    if (selectElement._choices) {
+                        selectElement._choices.destroy();
+                    }
+                    if (typeof Choices !== 'undefined') {
+                        var choices = new Choices(selectElement, {
+                            removeItemButton: true,
+                            searchEnabled: true
+                        });
+                        selectElement._choices = choices;
+                    }
+                });
                 /**
                  * PRO: worker_padding
                  */

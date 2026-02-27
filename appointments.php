@@ -2369,8 +2369,15 @@ $appointments->addons_loader = Appointments_Addons_Loader::get_instance();
 $appointments->addons_loader->load_active_addons();
 
 if ( is_admin() ) {
-	require_once APP_PLUGIN_DIR . '/includes/class-app-tutorial.php';
-	App_Tutorial::serve();
+	/**
+	 * Tutorial-System deaktiviert - wp-pointer benötigt jQuery UI (entfernt in WP 6.4+)
+	 * Alternative: Einfache Welcome Notice ohne jQuery UI Abhängigkeit
+	 */
+	// require_once APP_PLUGIN_DIR . '/includes/class-app-tutorial.php';
+	// App_Tutorial::serve();
+	
+	require_once APP_PLUGIN_DIR . '/includes/class-app-welcome-notice.php';
+	App_Welcome_Notice::serve();
 
 	require_once APP_PLUGIN_DIR . '/includes/support/class_app_admin_help.php';
 	App_AdminHelp::serve();

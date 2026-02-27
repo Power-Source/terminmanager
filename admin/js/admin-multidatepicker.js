@@ -1,65 +1,57 @@
+/**
+ * Multi-Date Picker using Flatpickr
+ * Migrated from jQuery UI Datepicker - no jQuery UI dependency
+ */
 var AppDatepicker = function( $element ) {
     var selectedDates = [];
     var rel;
-    var $datepicker;
-
-    function padNumber(number) {
-        var ret = new String(number);
-        if (ret.length == 1)
-            ret = "0" + ret;
-        return ret;
-    }
+    var flatpickrInstance;
 
     var datepicker = {
         init: function( $el ) {
             var self = this;
-
-            var options = {dateFormat: 'yy-mm-dd', numberOfMonths: 2};
-
-            options.onSelect = function( date ) {
-                self.toggleDate( date );
-            };
-
-            options.beforeShowDay = function (date) {
-                var year = date.getFullYear();
-                // months and days are inserted into the array in the form, e.g "01/01/2009", but here the format is "1/1/2009"
-                var month = padNumber(date.getMonth() + 1);
-                var day = padNumber(date.getDate());
-                // This depends on the datepicker's date format
-                var dateString = year + "-" + month + "-" + day;
-
-                var gotDate = jQuery.inArray(dateString, selectedDates);
-                if (gotDate >= 0) {
-                    // Enable date so it can be deselected. Set style to be highlighted
-                    return [true, "ui-state-highlight"];
+            
+            // Get related hidden input
+            rel = jQuery($el.data('rel'));
+            
+            // Parse existing dates
+            var existingDates = rel.val().split(',').filter(function(d) { return d.trim(); });
+            selectedDates = existingDates.slice();
+            
+            // Initialize Flatpickr with multi-date support
+            flatpickrInstance = flatpickr($el[0], {
+                mode: 'multiple',
+                dateFormat: 'Y-m-d',
+                inline: true,
+                defaultDate: selectedDates,
+                showMonths: 2,
+                onChange: function(dates, dateStr, instance) {
+                    // Update selectedDates array
+                    selectedDates = dates.map(function(date) {
+                        var year = date.getFullYear();
+                        var month = String(date.getMonth() + 1).padStart(2, '0');
+                        var day = String(date.getDate()).padStart(2, '0');
+                        return year + '-' + month + '-' + day;
+                    });
+                    self.updateRel();
                 }
-                // Dates not in the array are left enabled, but with no extra style
-                return [true, ""];
-            };
-
-            rel = jQuery($el.data( 'rel' ));
-
-            var dates = rel.val().split(',');
-            for ( i in dates ) {
-                this.toggleDate( dates[i] );
-            }
-
-            $datepicker = $el.datepicker( options );
+            });
         },
         toggleDate: function( date ) {
-            var index = jQuery.inArray(date, selectedDates);
+            var index = selectedDates.indexOf(date);
             if (index > -1) {
                 selectedDates.splice(index, 1);
+            } else {
+                selectedDates.push(date);
             }
-            else {
-                selectedDates.push( date );
+            
+            if (flatpickrInstance) {
+                flatpickrInstance.setDate(selectedDates, false);
             }
-
             this.updateRel();
-
         },
         updateRel: function() {
-            rel.val( this.getDates().join( ',' ) );
+            rel.val(this.getDates().join(','));
         },
         getDates: function() {
             return selectedDates;
@@ -71,3 +63,4 @@ var AppDatepicker = function( $element ) {
 };
 
 window.AppDatepicker = AppDatepicker;
+
