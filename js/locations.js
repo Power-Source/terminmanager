@@ -11,24 +11,36 @@ function create_new_location () {
 	if ($additive.length) $additive.remove();
 
 	markup += '<h3>' + labels.new_location + '</h3>';
+	var $container = $("<div>", { id: "app-locations-new_location" });
+	$container.append($("<h3>").text(labels.new_location));
+
 	$.each(fields, function (field, label) {
-		markup += '<label for="app-location-' + field + '">' +
-			label +
-			'&nbsp;' +
-			'<input type="text" id="app-location-' + field + '" />' +
-		'</label>';
+		var $label = $("<label>", { "for": "app-location-" + field }).text(label);
+		var $input = $("<input>", {
+			type: "text",
+			id: "app-location-" + field,
+			value: ""
+		});
+		$label.append($input);
+		$container.append($label);
 	});
 
-	markup += '<button class="button button-primary" type="button" id="app-locations-create_location">' +
-		labels.add_location +
-	'</button>';
-	markup += '<button class="button button-secondary" type="button" id="app-locations-cancel_location">' +
-		labels.cancel_editing +
-	'</button>';
-
-	$root.after(
-		'<div id="app-locations-new_location">' + markup + '</div>'
+	$container.append(
+		$("<button>", {
+			"class": "button button-primary",
+			type: "button",
+			id: "app-locations-create_location"
+		}).text(labels.add_location)
 	);
+	$container.append(
+		$("<button>", {
+			"class": "button button-secondary",
+			type: "button",
+			id: "app-locations-cancel_location"
+		}).text(labels.cancel_editing)
+	);
+
+	$root.after($container);
 
 	$("#app-locations-create_location").on("click", function () {
 		var location = {},
@@ -62,25 +74,36 @@ function edit_location () {
 	;
 	if ($additive.length) $additive.remove();
 
-	markup += '<h3>' + labels.edit_location + '</h3>';
+	var $container = $("<div>", { id: "app-locations-new_location" });
+	$container.append($("<h3>").text(labels.edit_location));
+
 	$.each(fields, function (field, label) {
-		markup += '<label for="app-location-' + field + '">' +
-			label +
-			'&nbsp;' +
-			'<input type="text" id="app-location-' + field + '" value="' + data[field] + '" />' +
-		'</label>';
+		var $label = $("<label>", { "for": "app-location-" + field }).text(label);
+		var $input = $("<input>", {
+			type: "text",
+			id: "app-location-" + field,
+			value: data[field] || ""
+		});
+		$label.append($input);
+		$container.append($label);
 	});
 
-	markup += '<button class="button button-primary" type="button" id="app-locations-create_location">' +
-		labels.save_location +
-	'</button>';
-	markup += '<button class="button button-secondary" type="button" id="app-locations-cancel_location">' +
-		labels.cancel_editing +
-	'</button>';
-
-	$root.after(
-		'<div id="app-locations-new_location">' + markup + '</div>'
+	$container.append(
+		$("<button>", {
+			"class": "button button-primary",
+			type: "button",
+			id: "app-locations-create_location"
+		}).text(labels.save_location)
 	);
+	$container.append(
+		$("<button>", {
+			"class": "button button-secondary",
+			type: "button",
+			id: "app-locations-cancel_location"
+		}).text(labels.cancel_editing)
+	);
+
+	$root.after($container);
 
 	$("#app-locations-create_location").on("click", function () {
 		var location = data,

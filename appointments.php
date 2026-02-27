@@ -2,7 +2,7 @@
 /*
 Plugin Name: Terminmanager
 Description: Ermöglicht das Akzeptieren von Terminen vom Frontend und das Verwalten oder Erstellen von Terminen vom Administrator aus.
-Plugin URI: https://cp-psource.github.io/terminmanager-pro/
+Plugin URI: https://power-source.github.io/terminmanager/
 Version: 1.1.7
 Author: PSOURCE
 Author URI: https://github.com/cp-psource

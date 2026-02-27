@@ -90,12 +90,24 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
             if (button.is("#app-export-selected") && checkedApps.length) {
                 checkedApps.each(function () {
-                    $form.append("<input type='hidden' name='app[]' value='" + $(this).val() + "' />");
+                    $form.append(
+                        $("<input>", {
+                            type: "hidden",
+                            name: "app[]",
+                            value: $(this).val()
+                        })
+                    );
                 });
                 type.val("selected");
                 return true;
             } else if (button.is("#app-export-type")) {
-                $form.append("<input type='hidden' name='status' value='" + button.attr("data-type") + "' />");
+                $form.append(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "status",
+                        value: button.attr("data-type")
+                    })
+                );
                 type.val("type");
                 return true;
             } else if (button.is("#app-export-all")) {
@@ -111,7 +123,13 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
             // var data = { 'app[]' : []};
             selection.each(function() {
                 // data['app[]'].push($(this).val());
-                button.after('<input type="hidden" name="app[]" value="'+$(this).val()+'"/>');
+                button.after(
+                    $("<input>", {
+                        type: "hidden",
+                        name: "app[]",
+                        value: $(this).val()
+                    })
+                );
             });
 
             return true;
@@ -238,7 +256,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
                 
                 var error_msg = $('<div />',{
                     'class' : 'error'
-                }).html( response.error );
+                }).text( response.error );
 
                 $select.after( error_msg );
                 error_msg.delay(10000).fadeOut('slow');
@@ -247,14 +265,23 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
             } else if (response) {
                 // Received the new time slots for worker
-                 var slots = JSON.parse( response.message );
+                var slots = response.slots || [];
 
                 // Empty the old slots list and add the unknown option
-                $slots_list.empty().append( '<option value="' + $unknown_slot.val() + '">' + $unknown_slot.text() + '</option>' );
+                $slots_list.empty().append(
+                    $("<option>", {
+                        value: $unknown_slot.val()
+                    }).text( $unknown_slot.text() )
+                );
 
                 // Add the new timeslots
-                for ( var key in slots ) {
-                    $slots_list.append( slots[key] );
+                for ( var i = 0; i < slots.length; i++ ) {
+                    $slots_list.append(
+                        $("<option>", {
+                            value: slots[i].value,
+                            selected: !!slots[i].selected
+                        }).text( slots[i].label )
+                    );
                 }
             } else {
                 alert( strings.unexpectedError );
@@ -309,10 +336,10 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
         $.post(ajaxurl, data, function(response) {
             $spinner.hide();
             if ( response && response.error ){
-                target.find(".error").html(response.error).show().delay(10000).fadeOut('slow');
+                target.find(".error").text(response.error).show().delay(10000).fadeOut('slow');
                 return;
             } else if (response) {
-                target.find(".error").html(response.message).show().delay(10000).fadeOut('slow');
+                target.find(".error").text(response.message).show().delay(10000).fadeOut('slow');
             } else {
                 alert( strings.unexpectedError );
                 return;

@@ -134,7 +134,7 @@ class Appointments_AJAX {
 		if ( is_wp_error( $error ) ) {
 			$result = array(
 				'app_id' => $app_id,
-				'message' => '<strong style="color:red;">' . _x( 'Fehler', 'Fehler beim Bearbeiten eines Termins', 'appointments' ) . ': ' . $error->get_error_message() . '</strong>'
+				'error' => _x( 'Fehler', 'Fehler beim Bearbeiten eines Termins', 'appointments' ) . ': ' . $error->get_error_message()
 			);
 			wp_send_json( $result );
 		}
@@ -142,7 +142,7 @@ class Appointments_AJAX {
 			// Unknown error
 			$result = array(
 				'app_id' => $app_id,
-				'message' => '<strong style="color:red;">' . _x( 'Fehler', 'Fehler beim Bearbeiten eines Termins', 'appointments' ) . ': ' . __( 'Datensatz konnte nicht gespeichert werden ODER Du hast keine Änderungen vorgenommen!', 'appointments' ) . '</strong>'
+				'error' => _x( 'Fehler', 'Fehler beim Bearbeiten eines Termins', 'appointments' ) . ': ' . __( 'Datensatz konnte nicht gespeichert werden ODER Du hast keine Änderungen vorgenommen!', 'appointments' )
 			);
 			wp_send_json( $result );
 		}
@@ -327,24 +327,22 @@ class Appointments_AJAX {
         $slots = appointments_get_worker_weekly_start_hours( $app_id, $worker_id, $location_id, true, 'admin_min_time' );
         if ( ! $slots ) {
             $result = array(
-                'error' => '<strong style="color:red;">' . __( 'Fehler beim Abrufen der Arbeitszeit.', 'appointments' ) . '</strong>'
+				'error' => __( 'Fehler beim Abrufen der Arbeitszeit.', 'appointments' )
             );
-            wp_send_json( $worker_slots );
+			wp_send_json( $result );
         }
         $worker_slots = array();
         if ( is_array( $slots ) ) {
             foreach ( $slots as $slot ) {
-                $h = strtotime( $slot );
-                $worker_slots[] = sprintf(
-                    '<option value="%s" %s>%s</option>',
-                    esc_attr( $slot ),
-                    selected( $selected_slot, $slot, false ),
-                    esc_html( date( $format, strtotime( $slot ) ) )
-                );
+				$worker_slots[] = array(
+					'value' => $slot,
+					'label' => date( $format, strtotime( $slot ) ),
+					'selected' => ( $selected_slot === $slot )
+				);
             }
         }
         $result = array(
-            'message' => json_encode( $worker_slots )
+			'slots' => $worker_slots
         );
         wp_send_json( $result );
     }
