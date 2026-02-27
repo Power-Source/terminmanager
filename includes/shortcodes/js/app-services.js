@@ -9,7 +9,7 @@ jQuery(document).ready(function($) {
         strings: null,
 
         init: function() {
-            var self = this;
+            const self = this;
             this.strings = appointmentsStrings;
             this.$servicesSelector = $('.app_select_services');
             this.$submitButton = $('.app_services_button');
@@ -22,11 +22,11 @@ jQuery(document).ready(function($) {
         },
 
         bind: function() {
-            var self = this;
+            const self = this;
 
             this.$submitButton.on("click", function(){
-                var selected_service = self.$servicesSelector.val();
-                if ( typeof selected_service=='undefined' || selected_service===null ) {
+                let selected_service = self.$servicesSelector.val();
+                if ( typeof selected_service==='undefined' || selected_service===null ) {
                     selected_service=self.strings.first_service_id;
                 }
 
@@ -34,7 +34,7 @@ jQuery(document).ready(function($) {
             });
 
             this.$servicesSelector.on('change', function(){
-                var selected_service = $(this).val();
+                const selected_service = $(this).val();
 
                 if ( self.strings.autorefresh == '1' ) {
                     self.$submitButton.trigger( 'click' );

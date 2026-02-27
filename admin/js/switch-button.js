@@ -13,11 +13,11 @@
 jQuery( window.document ).ready(function(){
     "use strict";
     if ( jQuery.fn.switchButton ) {
-        var appointment_admin_check_slaves = function() {
+        const appointment_admin_check_slaves = function() {
             jQuery('.appointments-settings .switch-button' ).each( function() {
-                var slave = jQuery(this).data('slave');
+                const slave = jQuery(this).data('slave');
                 if ( slave ) {
-                    var slaves = jQuery( '.appointments-settings .'+slave );
+                    const slaves = jQuery( '.appointments-settings .'+slave );
                     if ( jQuery( '.switch-button-background', jQuery(this).closest('td') ).hasClass( 'checked' ) ) {
                         slaves.show();
                     } else {
@@ -27,7 +27,7 @@ jQuery( window.document ).ready(function(){
             });
         };
         jQuery('.appointments-settings .switch-button').each(function() {
-            var options = {
+            const options = {
                 checked: jQuery(this).checked,
                 on_label: jQuery(this).data('on') || switch_button.labels.label_on,
                 off_label: jQuery(this).data('off') || switch_button.labels.label_off,

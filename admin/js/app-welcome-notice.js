@@ -9,8 +9,8 @@
     $(document).ready(function() {
         // Handle dismiss button
         $('.app-welcome-notice .notice-dismiss').on('click', function() {
-            var $notice = $(this).closest('.app-welcome-notice');
-            var noticeId = $notice.data('notice-id');
+            const $notice = $(this).closest('.app-welcome-notice');
+            const noticeId = $notice.data('notice-id');
             
             $.post(ajaxurl, {
                 action: 'app_dismiss_welcome_notice',
@@ -22,11 +22,11 @@
         // Handle quick setup button
         $('.app-welcome-notice .app-quick-setup').on('click', function(e) {
             e.preventDefault();
-            var url = $(this).attr('href');
+            const url = $(this).attr('href');
             
             // Dismiss notice and redirect
-            var $notice = $(this).closest('.app-welcome-notice');
-            var noticeId = $notice.data('notice-id');
+            const $notice = $(this).closest('.app-welcome-notice');
+            const noticeId = $notice.data('notice-id');
             
             $.post(ajaxurl, {
                 action: 'app_dismiss_welcome_notice',

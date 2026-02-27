@@ -1,0 +1,61 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true,
+    "jquery": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "plugins": ["jquery"],
+  "globals": {
+    "wp": "readonly",
+    "jQuery": "readonly",
+    "$": "readonly",
+    "ajaxurl": "writable",
+    "appointments": "readonly",
+    "appointmentsStrings": "readonly",
+    "Appointments": "writable",
+    "AppSwitchButton": "readonly",
+    "flatpickr": "readonly",
+    "Choices": "readonly",
+    "AppointmentsAdmin": "readonly",
+    "Appi18n": "readonly",
+    "AppointmentsDateSettings": "readonly",
+    "_app_admin_data": "readonly",
+    "appWelcomeNotice": "readonly",
+    "tinymce": "readonly",
+    "AppShortcodeConfirmation": "readonly",
+    "swal": "readonly",
+    "app_cancel_location": "readonly",
+    "app_location": "readonly",
+    "appMyAppointmentsStrings": "readonly",
+    "l10nAppApi": "readonly",
+    "FB": "readonly",
+    "_appointments_data": "readonly",
+    "gapi": "readonly",
+    "EYE": "readonly",
+    "_app_locations_data": "readonly",
+    "app_i10n": "readonly",
+    "columns": "readonly",
+    "pagenow": "readonly"
+  },
+  "rules": {
+    "no-unused-vars": ["warn", { "argsIgnorePattern": "^_" }],
+    "no-console": "warn",
+    "no-debugger": "error",
+    "eqeqeq": ["warn", "always"],
+    "curly": ["warn", "all"],
+    "no-var": "warn",
+    "prefer-const": "warn",
+    "no-undef": "error",
+    "no-global-assign": "warn",
+    "no-redeclare": "warn",
+    "no-self-assign": "warn",
+    "no-empty": "warn",
+    "no-prototype-builtins": "warn",
+    "no-sparse-arrays": "warn"
+  }
+}

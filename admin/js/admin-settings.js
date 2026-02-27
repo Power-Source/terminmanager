@@ -1,11 +1,11 @@
 jQuery( document ).ready( function( $ ) {
     // COLOR SCHEMES (Display)
-    var customColorRow = $(".custom_color_row");
-    var presetSamples = $(".preset_samples");
-    var _class, k, i;
+    const customColorRow = $(".custom_color_row");
+    const presetSamples = $(".preset_samples");
+    let _class, k, i;
 
     $('select[name="color_set"]').on('change', function () {
-        var n = $(this).val();
+        const n = $(this).val();
         if (n == 0) {
             customColorRow.show();
             presetSamples.hide();
@@ -25,9 +25,9 @@ jQuery( document ).ready( function( $ ) {
         }
     });
 
-    var colorpicker = $('.colorpicker_input');
+    const colorpicker = $('.colorpicker_input');
     colorpicker.each(function () {
-        var id = this.id;
+        const id = this.id;
         $('#' + id).ColorPicker({
                 onSubmit: function (hsb, hex, rgb, el) {
                     $(el).val(hex);
@@ -37,7 +37,7 @@ jQuery( document ).ready( function( $ ) {
                     $(this).ColorPickerSetColor(this.value);
                 },
                 onChange: function (hsb, hex, rgb) {
-                    var element = $('#' + id);
+                    const element = $('#' + id);
                     element.val(hex);
                     element.parent().find('a.pickcolor').css('background-color', '#' + hex);
                 }
@@ -47,17 +47,17 @@ jQuery( document ).ready( function( $ ) {
             });
     });
     colorpicker.on('keyup',function () {
-        var a = $(this).val();
+        let a = $(this).val();
         a = a.replace(/[^a-fA-F0-9]/, '');
         if (a.length === 3 || a.length === 6)
-            $(this).parent().find('a.pickcolor').css('background-color', '#' + a);
+            {$(this).parent().find('a.pickcolor').css('background-color', '#' + a);}
     });
 
     /**
      * Check Services Provided on Appointments Settings page
      */
     $('#app-settings-section-new-worker form.add-new-service-provider').on( "submit", function() {
-        var form = $(this);
+        const form = $(this);
         if( null == $("#services_provided", form).val()) {
             alert( app_i10n.messages.select_service_provider);
             return false;
@@ -67,14 +67,14 @@ jQuery( document ).ready( function( $ ) {
      * Create a page
      */
     $('.appointment-create-page a.button').on( 'click', function() {
-        var value = $('select', $(this).closest('td') ).val();
-        var data = {
+        const value = $('select', $(this).closest('td') ).val();
+        const data = {
             action: $(this).data('action'),
             _wpnonce: $(this).data('nonce'),
             app_page_type: value
         };
         $.post(ajaxurl, data, function(response) {
-            var html = '<div class="notice '+(response.success? 'updated':'error')+'"><p>'+response.data.message+'</p></div>';
+            const html = '<div class="notice '+(response.success? 'updated':'error')+'"><p>'+response.data.message+'</p></div>';
             $('.appointments-settings h1').after(html);
         });
         return false;
@@ -90,7 +90,7 @@ jQuery( document ).ready( function( $ ) {
             if ( response.success ) {
                 parent.detach();
             }
-            var html = '<div class="notice notice-'+(response.success? 'success':'error')+' is-dismissible"><p>'+response.data.message+'</p></div>';
+            const html = '<div class="notice notice-'+(response.success? 'success':'error')+' is-dismissible"><p>'+response.data.message+'</p></div>';
             $('.appointments-settings h1').after(html);
         });
     }
@@ -101,8 +101,8 @@ jQuery( document ).ready( function( $ ) {
      */
     $(document).on('click', '.wp-list-table.services .delete a', function() {
         if ( window.confirm( app_i10n.messages.service.delete_confirmation ) ) {
-            var parent = $(this).closest('tr');
-            var data = {
+            const parent = $(this).closest('tr');
+            const data = {
                 'action': 'delete_service',
                 'nonce': $(this).data('nonce'),
                 'id': $(this).data('id')
@@ -117,9 +117,9 @@ jQuery( document ).ready( function( $ ) {
      * @since 2.3.0
      */
     $(document).on('click', '#app-settings-section-services input.action', function() {
-        var parent = $(this).closest('form');
-        var list = $('.check-column input:checked');
-        var action = $('select', $(this).parent() ).val();
+        const parent = $(this).closest('form');
+        const list = $('.check-column input:checked');
+        const action = $('select', $(this).parent() ).val();
         if ( 0 === list.length ) {
             window.alert( app_i10n.messages.bulk_actions.no_items );
             return false;
@@ -140,8 +140,8 @@ jQuery( document ).ready( function( $ ) {
      */
     $(document).on('click', '.wp-list-table.workers .delete a', function() {
         if ( window.confirm( app_i10n.messages.workers.delete_confirmation ) ) {
-            var parent = $(this).closest('tr');
-            var data = {
+            const parent = $(this).closest('tr');
+            const data = {
                 'action': 'delete_worker',
                 'nonce': $(this).data('nonce'),
                 'id': $(this).data('id')
@@ -156,9 +156,9 @@ jQuery( document ).ready( function( $ ) {
      * @since 2.3.0
      */
     $(document).on('click', '#app-settings-section-workers input.action', function() {
-        var parent = $(this).closest('form');
-        var list = $('.check-column input:checked');
-        var action = $('select', $(this).parent() ).val();
+        const parent = $(this).closest('form');
+        const list = $('.check-column input:checked');
+        const action = $('select', $(this).parent() ).val();
         if ( 0 === list.length ) {
             window.alert( app_i10n.messages.bulk_actions.no_items );
             return false;
@@ -179,9 +179,9 @@ jQuery( document ).ready( function( $ ) {
      */
     // HTML5 Range Slider (replaces jQuery UI Slider)
     document.querySelectorAll('.app-range-slider input[type="range"]').forEach(function(slider) {
-        var targetId = slider.getAttribute('data-target-id');
+        const targetId = slider.getAttribute('data-target-id');
         if (targetId) {
-            var target = document.getElementById(targetId);
+            const target = document.getElementById(targetId);
             if (target) {
                 // Sync slider with number input
                 slider.value = target.value || slider.min;
@@ -190,19 +190,19 @@ jQuery( document ).ready( function( $ ) {
                 slider.addEventListener('input', function() {
                     target.value = this.value;
                     // Update CSS variable for visual progress
-                    var percent = ((this.value - this.min) / (this.max - this.min)) * 100;
+                    const percent = ((this.value - this.min) / (this.max - this.min)) * 100;
                     this.style.setProperty('--slider-progress', percent + '%');
                 });
                 
                 // Update slider when number input changes
                 target.addEventListener('input', function() {
                     slider.value = this.value;
-                    var percent = ((this.value - slider.min) / (slider.max - slider.min)) * 100;
+                    const percent = ((this.value - slider.min) / (slider.max - slider.min)) * 100;
                     slider.style.setProperty('--slider-progress', percent + '%');
                 });
                 
                 // Initialize progress bar
-                var percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
                 slider.style.setProperty('--slider-progress', percent + '%');
             }
         }
@@ -214,7 +214,7 @@ jQuery( document ).ready( function( $ ) {
      * @since 2.4.0
      */
     columns.saveManageColumnsState = function() {
-        var hidden = this.hidden();
+        const hidden = this.hidden();
         $.post(ajaxurl, {
             action: 'hidden-columns',
             hidden: hidden,

@@ -4,8 +4,8 @@ window.MaximumErrorCount = 5;
 window.onerror = function(errorMsg, file, lineNumber) {
   window.errorCount || (window.errorCount = 0);
   
-  var frontend = false;
-  if ( typeof ajaxurl == 'undefined' ) {
+  let frontend = false;
+  if ( typeof ajaxurl === 'undefined' ) {
 	frontend = true;
 	ajaxurl = _appointments_data.ajax_url;
   }
@@ -34,8 +34,8 @@ function app_location() {
 		return _appointments_data.thank_page_url;
 	}
 
-	var loc = window.location.href;
-	index = loc.indexOf("#");
+	let loc = window.location.href;
+	const index = loc.indexOf("#");
 	if (index > 0) {
 	loc = loc.substring(0, index);
 	}

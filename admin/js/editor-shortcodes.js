@@ -3,7 +3,7 @@
 
     tinymce.PluginManager.add( 'appointments_shortcodes', function ( editor ) {
 
-        var datepickers = [];
+        const datepickers = [];
 
         /**
          * Generate the content for a shortcode popup
@@ -12,10 +12,10 @@
          * @returns {{text: *, onclick: onclick}}
          */
         function appointments_shortcode_item( shortcode ) {
-            var body = [],
+            let body = [],
                 field;
 
-            for ( var i in shortcode.defaults ) {
+            for ( const i in shortcode.defaults ) {
                 field = appointments_shortcode_field( i, shortcode.defaults[i] );
                 if ( field ) {
                     body.push( field );
@@ -42,7 +42,7 @@
          * @returns {boolean}
          */
         function appointments_shortcode_field( id, definition ) {
-            var field = {};
+            let field = {};
             switch ( definition.type ) {
                 case 'text': {
                     field = {
@@ -60,8 +60,8 @@
                         label: definition.name,
                         value: definition.value,
                         onclick: function() {
-                            var id = this._id;
-                            var element = jQuery( '#' + id );
+                            const id = this._id;
+                            const element = jQuery( '#' + id );
                             if ( datepickers.indexOf( id ) < 0 ) {
                                 // Initialize Datepicker
                                 datepickers.push( id );
@@ -121,9 +121,9 @@
          */
         function appointments_shortcode_on_submit( shortcode ) {
             return function( e ) {
-                var atts = '';
-                var value;
-                for ( var i in shortcode.defaults ) {
+                let atts = '';
+                let value;
+                for ( const i in shortcode.defaults ) {
                     if ( typeof e.data[ i ] !== 'undefined' && shortcode.defaults[i].value != e.data[i] ) {
                         value = e.data[i];
                         if ( 'checkbox' === shortcode.defaults[i].type ) {
@@ -136,17 +136,17 @@
             }
         }
 
-        var ed = tinymce.activeEditor,
+        let ed = tinymce.activeEditor,
             shortcode,
             registeredShortcodes;
 
-        var app_menu = [];
+        const app_menu = [];
 
 
 
         registeredShortcodes = ed.getLang( 'appointments_shortcodes.shortcodes' );
 
-        for ( var i in registeredShortcodes ) {
+        for ( const i in registeredShortcodes ) {
             shortcode = registeredShortcodes[i];
 
             app_menu.push((function (short) {

@@ -1,0 +1,14 @@
+node_modules/
+vendor/
+assets/js/vendor/
+js/jquery.tablesorter.min.js
+js/colorpicker.js
+js/eye.js
+admin/css/
+css/
+images/
+includes/external/
+tests/
+docs/
+languages/
+*.min.js

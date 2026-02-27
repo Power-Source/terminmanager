@@ -1,7 +1,7 @@
 (function($){
-	var initLayout = function() {
-		var hash = window.location.hash.replace('#', '');
-		var currentTab = $('ul.navigationTabs a')
+	const initLayout = function() {
+		const hash = window.location.hash.replace('#', '');
+		let currentTab = $('ul.navigationTabs a')
 							.on('click', showTab)
 							.filter('a[rel=' + hash + ']');
 		if (currentTab.length() == 0) {
@@ -17,7 +17,7 @@
 			}
 		});
 		$('#colorpickerHolder2>div').css('position', 'absolute');
-		var widt = false;
+		let widt = false;
 		$('#colorSelector2').on('click', function() {
 			$('#colorpickerHolder2').stop().animate({height: widt ? 0 : 173}, 500);
 			widt = !widt;
@@ -51,7 +51,7 @@
 	};
 	
 	var showTab = function(e) {
-		var tabIndex = $('ul.navigationTabs a')
+		const tabIndex = $('ul.navigationTabs a')
 							.removeClass('active')
 							.index(this);
 		$(this)

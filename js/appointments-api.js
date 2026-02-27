@@ -2,7 +2,7 @@
 (function($) {
 
     function is_available(service) {
-        var all = l10nAppApi && l10nAppApi.show_login_button ? l10nAppApi.show_login_button : [];
+        const all = l10nAppApi && l10nAppApi.show_login_button ? l10nAppApi.show_login_button : [];
         return all.indexOf(service) >= 0;
     }
 
@@ -11,7 +11,7 @@
             $("#appointments-login_links-wrapper").remove();
         }
         $me.parents('.appointments-login').after('<div id="appointments-login_links-wrapper" />');
-        var $root = $("#appointments-login_links-wrapper");
+        const $root = $("#appointments-login_links-wrapper");
         $root.html(
             '<ul class="appointments-login_links">' +
             (is_available('facebook') ? '<li><a href="#" class="appointments-login_link appointments-login_link-facebook">' + l10nAppApi.facebook + '</a></li>' : '') +
@@ -31,10 +31,10 @@
         );
         // $me.find(".not_loggedin").addClass("active");
         $root.find(".appointments-login_link").each(function() {
-            var $lnk = $(this);
-            var callback = false;
+            const $lnk = $(this);
+            let callback = false;
             if ($lnk.is(".appointments-login_link-facebook")) {
-                if ("undefined" == typeof FB) {
+                if ("undefined" === typeof FB) {
                     $lnk.parents('li').hide();
                     return true;
                 }
@@ -49,7 +49,7 @@
                                 "user_id": resp.authResponse.userID,
                                 "token": FB.getAccessToken()
                             }, function(data) {
-                                var status = 0;
+                                let status = 0;
                                 try { status = parseInt(data.status, 10); } catch (e) { status = 0; }
                                 if (!status) { // ... handle error
                                     $root.remove();
@@ -73,13 +73,13 @@
                     return true;
                 }
                 callback = function() {
-                    var twLogin = window.open('', "twitter_login", "scrollbars=no,resizable=no,toolbar=no,location=no,directories=no,status=no,menubar=no,copyhistory=no,height=400,width=600");
+                    const twLogin = window.open('', "twitter_login", "scrollbars=no,resizable=no,toolbar=no,location=no,directories=no,status=no,menubar=no,copyhistory=no,height=400,width=600");
                     twLogin.document.write(l10nAppApi.please_wait || "Please hold on...");
                     $.post(_appointments_data.ajax_url, {
                         "action": "app_get_twitter_auth_url",
                         "url": window.location.toString()
                     }, function(data) {
-                        var href = data.url,
+                        const href = data.url,
                             cback = function() {
                                 $(twLogin).off("unload", cback);
                                 var tTimer = setInterval(function() {
@@ -88,8 +88,8 @@
                                             clearInterval(tTimer);
                                             twLogin.close();
                                             // We're back!
-                                            var location = twLogin.location;
-                                            var search = '';
+                                            const location = twLogin.location;
+                                            let search = '';
                                             try { search = location.search; } catch (e) { search = ''; }
                                             clearInterval(tTimer);
                                             twLogin.close();
@@ -100,7 +100,7 @@
                                                 "secret": data.secret,
                                                 "data": search
                                             }, function(data) {
-                                                var status = 0;
+                                                let status = 0;
                                                 try { status = parseInt(data.status, 10); } catch (e) { status = 0; }
                                                 if (!status) { // ... handle error
                                                     $root.remove();
@@ -125,12 +125,12 @@
                 };
             } else if ($lnk.is(".appointments-login_link-google")) {
                 callback = function() {
-                    var googleLogin = window.open('https://www.google.com/accounts', "google_login", "scrollbars=no,resizable=no,toolbar=no,location=no,directories=no,status=no,menubar=no,copyhistory=no,height=400,width=800");
+                    const googleLogin = window.open('https://www.google.com/accounts', "google_login", "scrollbars=no,resizable=no,toolbar=no,location=no,directories=no,status=no,menubar=no,copyhistory=no,height=400,width=800");
                     $.post(_appointments_data.ajax_url, {
                         "action": "app_get_google_auth_url",
                         "url": window.location.href
                     }, function(data) {
-                        var href = data.url;
+                        const href = data.url;
                         googleLogin.location = href;
                         var gTimer = setInterval(function() {
                             try {
@@ -143,7 +143,7 @@
                                     $.post(_appointments_data.ajax_url, {
                                         "action": "app_google_login"
                                     }, function(data) {
-                                        var status = 0;
+                                        let status = 0;
                                         try { status = parseInt(data.status, 10); } catch (e) { status = 0; }
                                         if (!status) { // ... handle error
                                             $root.remove();
@@ -183,7 +183,7 @@
                         "rememberme": 1
                     }, function(data) {
                         $(".app_wait_img").remove();
-                        var status = 0;
+                        let status = 0;
                         try { status = parseInt(data.status, 10); } catch (e) { status = 0; }
                         if (!status) { // ... handle error
                             $lnk.after('<div class="app_error">' + data.error + '</div>');
@@ -206,11 +206,11 @@
                     return false;
                 };
             }
-            if (callback) $lnk
+            if (callback) {$lnk
                 .off('click')
-                .on('click', callback);
+                .on('click', callback);}
         });
-        if (l10nAppApi.gg_client_id && "undefined" !== typeof gapi && "undefined" !== typeof gapi.signin) gapi.signin.go();
+        if (l10nAppApi.gg_client_id && "undefined" !== typeof gapi && "undefined" !== typeof gapi.signin) {gapi.signin.go();}
     }
 
     function signinCallback(authResult) {
@@ -234,11 +234,11 @@
         if (l10nAppApi.gg_client_id) {
             window.app_google_plus_login_callback = signinCallback;
             (function() {
-                var po = document.createElement('script');
+                const po = document.createElement('script');
                 po.type = 'text/javascript';
                 po.async = true;
                 po.src = 'https://apis.google.com/js/client:plusone.js';
-                var s = document.getElementsByTagName('script')[0];
+                const s = document.getElementsByTagName('script')[0];
                 s.parentNode.insertBefore(po, s);
             })();
         }

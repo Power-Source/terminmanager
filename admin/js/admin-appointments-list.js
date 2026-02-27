@@ -11,7 +11,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
      */
     function AppointmentsList( options ) {
         // Set default options array
-        var defaults = {
+        const defaults = {
             servicesPrice: []
         };
         this.options = $.extend( {}, defaults, options );
@@ -48,9 +48,9 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
         // Show inline editor when editing a single appointment
         this.$editAppointment.on( "click", function(e) {
-            var appId = $(e.target).data( 'app-id' );
-            var row = $('#app-' + appId );
-            var $spinner = row.find(".waiting");
+            const appId = $(e.target).data( 'app-id' );
+            const row = $('#app-' + appId );
+            const $spinner = row.find(".waiting");
 
             $spinner.show();
 
@@ -68,8 +68,8 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
         // Change service price as selection changes
         this.$table.on( 'change', 'select[name="service"]', function(e) {
-            var target = $(e.target);
-            var value = target.val();
+            const target = $(e.target);
+            const value = target.val();
             if ( this.options.servicesPrice[ value ] ) {
                 target.parents(".inline-edit-col")
                     .find( 'input[name="price"]' )
@@ -83,7 +83,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
         // @TODO Refactor
         this.$exportButton.on( "click", function(e) {
-            var button = $(e.target),
+            const button = $(e.target),
                 $form = button.closest("form"),
                 checkedApps = $(".column-delete.app-check-column :checked"),
                 type = $form.find("#app-export_type");
@@ -118,8 +118,8 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
         });
 
         $(".app-change-status-btn").on( "click", function(e){
-            var button = $(this);
-            var selection = $("th.app-check-column input:checkbox:checked");
+            const button = $(this);
+            const selection = $("th.app-check-column input:checkbox:checked");
             // var data = { 'app[]' : []};
             selection.each(function() {
                 // data['app[]'].push($(this).val());
@@ -140,9 +140,9 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
         });
 
         function toggle_selected_export () {
-            var $sel = $("#the-list .check-column :checked");
-            if ($sel.length) $("#app-export-selected").show();
-            else $("#app-export-selected").hide();
+            const $sel = $("#the-list .check-column :checked");
+            if ($sel.length) {$("#app-export-selected").show();}
+            else {$("#app-export-selected").hide();}
         }
 
         $(document).on("change", ".check-column input, .app-column-cb input", toggle_selected_export);
@@ -168,7 +168,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
      * @param callback Callback function to execute after success
      */
     AppointmentsList.prototype.showEditorForm = function( app_id, callback ) {
-        var data = {
+        const data = {
             action: 'inline_edit',
             col_len: this.options.columns,
             app_id: app_id,
@@ -216,7 +216,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
     */
     AppointmentsList.prototype.fetchWorkerHours = function(e) {
         
-        var $select             = $( e.target ),
+        const $select             = $( e.target ),
             $worker_id          = $select.val(),            
             $parent             = $select.parents( ".inline-edit-row" ),
             $app_id             = $parent.find( "select[name=service]" ).val(),
@@ -240,7 +240,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
         // @TODO: Check if date is set and include that too in ajax data
 
-        if ( typeof( $location ) != "undefined" ) {
+        if ( typeof( $location ) !== "undefined" ) {
             data.location_id         = $location.val();
         }
 
@@ -254,7 +254,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
             // When receiving an error message
             if ( response && response.error ){
                 
-                var error_msg = $('<div />',{
+                const error_msg = $('<div />',{
                     'class' : 'error'
                 }).text( response.error );
 
@@ -265,7 +265,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
 
             } else if (response) {
                 // Received the new time slots for worker
-                var slots = response.slots || [];
+                const slots = response.slots || [];
 
                 // Empty the old slots list and add the unknown option
                 $slots_list.empty().append(
@@ -275,7 +275,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
                 );
 
                 // Add the new timeslots
-                for ( var i = 0; i < slots.length; i++ ) {
+                for ( let i = 0; i < slots.length; i++ ) {
                     $slots_list.append(
                         $("<option>", {
                             value: slots[i].value,
@@ -293,13 +293,13 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
     }
 
     AppointmentsList.prototype.saveEditor = function(e) {
-        var $button = $(e.target);
-        var target = $button.parents(".inline-edit-row");
-        var $spinner = target.find(".waiting");
+        const $button = $(e.target);
+        const target = $button.parents(".inline-edit-row");
+        const $spinner = target.find(".waiting");
 
         $spinner.show();
 
-        var fields = [
+        const fields = [
             'user',
             'cname',
             'email',
@@ -315,7 +315,7 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
             'status'
         ];
 
-        var data = {};
+        const data = {};
         $.map( fields, function( fieldName ) {
             if ( 'cname' === fieldName ) {
                 data.name = target.find( '[name="' + fieldName + '"]').val();
@@ -325,8 +325,8 @@ AppointmentsAdmin = window.AppointmentsAdmin || {};
             }
         });
 
-        var app_id = $button.data('app-id');
-        var cancel_button = target.find('.cancel');
+        const app_id = $button.data('app-id');
+        const cancel_button = target.find('.cancel');
         data.app_id = app_id;
         data.resend = target.find('input[name="resend"]').is(':checked') ? 1 : 0;
         data.nonce = this.options.nonces.editApp;

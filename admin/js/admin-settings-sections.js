@@ -1,7 +1,7 @@
 jQuery(document).ready( function( $ ) {
-    var sections = [];
-    var currentSection = '';
-    var sectionsSize = 0;
+    const sections = [];
+    let currentSection = '';
+    let sectionsSize = 0;
     function activateSection( section ) {
         if ( sections[ section ] ) {
             if ( sections[ currentSection ] ) {
@@ -15,8 +15,8 @@ jQuery(document).ready( function( $ ) {
     }
     $('ul.subsubsub a').each( function() {
         sectionsSize++;
-        var $el = $(this);
-        var sectionStub = $el.data( 'section' );
+        const $el = $(this);
+        const sectionStub = $el.data( 'section' );
         sections[ sectionStub ] = {
             $el: $el,
             $section: $('#app-settings-' + sectionStub )
@@ -26,7 +26,7 @@ jQuery(document).ready( function( $ ) {
         });
     });
     if ( sectionsSize ) {
-        var hash = window.location.hash;
+        let hash = window.location.hash;
         if ( ! hash ) {
             hash = Object.keys(sections)[0];
         } else {
@@ -41,10 +41,10 @@ jQuery(document).ready( function( $ ) {
      * @since 2.3.0
      */
     $('.wp-list-table.services a.edit').on( 'click', function() {
-        var parent = $(this).closest('tr');
-        var sectionStub = 'section-edit-service';
-        var section = $('#app-settings-' + sectionStub );
-        var data = {
+        const parent = $(this).closest('tr');
+        const sectionStub = 'section-edit-service';
+        const section = $('#app-settings-' + sectionStub );
+        const data = {
             action: 'appointment_get_service',
             id: $(this).data('id'),
             _wpnonce: $(this).data('nonce')
@@ -66,14 +66,14 @@ jQuery(document).ready( function( $ ) {
                  *
                  * @since 2.3.2
                  */
-                var slider = document.getElementById('service-capacity-slider-edit');
+                const slider = document.getElementById('service-capacity-slider-edit');
                 if (slider) {
                     slider.value = response.data.capacity;
-                    var target = document.getElementById('service-capacity');
+                    const target = document.getElementById('service-capacity');
                     if (target) {
                         target.value = response.data.capacity;
                         // Update visual progress
-                        var percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
+                        const percent = ((slider.value - slider.min) / (slider.max - slider.min)) * 100;
                         slider.style.setProperty('--slider-progress', percent + '%');
                     }
                 }
@@ -103,7 +103,7 @@ jQuery(document).ready( function( $ ) {
                 if ( 'undefined' !== typeof response.data.shared_resources ) {
                     $('.app-shared_service label').show();
                     $('.app-shared_service input[type=checkbox]').each( function() {
-                        value = parseInt( $(this).val() );
+                        const value = parseInt( $(this).val() );
                         /**
                          * reset
                          */
@@ -116,12 +116,12 @@ jQuery(document).ready( function( $ ) {
                             $(this).closest('label').hide();
                         } else {
                             if ( 'undefined' !== typeof response.data.shared_resources.shared_ids ) {
-                                checked = response.data.shared_resources.shared_ids.indexOf( value );
+                                const checked = response.data.shared_resources.shared_ids.indexOf( value );
                                 $(this).prop( 'checked', -1 < checked );
                             }
                             if ( 'undefined' !== typeof response.data.shared_resources.direct_ids ) {
-                                checked = response.data.shared_resources.direct_ids.indexOf( value );
-                                $(this).prop( 'disabled', -1 < checked );
+                                const checked2 = response.data.shared_resources.direct_ids.indexOf( value );
+                                $(this).prop( 'disabled', -1 < checked2 );
                             }
                         }
                     });
@@ -142,10 +142,10 @@ jQuery(document).ready( function( $ ) {
      * @since 2.3.0
      */
     $('.wp-list-table.workers a.edit').on( 'click', function() {
-        var parent = $(this).closest('tr');
-        var sectionStub = 'section-edit-worker';
-        var section = $('#app-settings-' + sectionStub );
-        var data = {
+        const parent = $(this).closest('tr');
+        const sectionStub = 'section-edit-worker';
+        const section = $('#app-settings-' + sectionStub );
+        const data = {
             action: 'appointment_get_worker',
             id: $(this).data('id'),
             _wpnonce: $(this).data('nonce')
@@ -172,13 +172,13 @@ jQuery(document).ready( function( $ ) {
                 /**
                  * refresh multiselect (Choices.js - replaces jQuery UI Multiselect)
                  */
-                var selectElements = document.querySelectorAll('.add_worker_multiple');
+                const selectElements = document.querySelectorAll('.add_worker_multiple');
                 selectElements.forEach(function(selectElement) {
                     if (selectElement._choices) {
                         selectElement._choices.destroy();
                     }
                     if (typeof Choices !== 'undefined') {
-                        var choices = new Choices(selectElement, {
+                        const choices = new Choices(selectElement, {
                             removeItemButton: true,
                             searchEnabled: true
                         });

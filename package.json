@@ -1,0 +1,17 @@
+{
+  "name": "terminmanager",
+  "version": "1.0.0",
+  "private": true,
+  "description": "WordPress Terminmanager Plugin",
+  "scripts": {
+    "lint": "eslint '**/*.js' --ignore-pattern 'node_modules/' --ignore-pattern 'assets/js/vendor/'",
+    "lint:fix": "eslint '**/*.js' --ignore-pattern 'node_modules/' --ignore-pattern 'assets/js/vendor/' --fix"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-plugin-jquery": "^1.5.1"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

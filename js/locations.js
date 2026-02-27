@@ -2,21 +2,21 @@
 
 
 function create_new_location () {
-	var $root = $("#app-locations-add_location"),
+	let $root = $("#app-locations-add_location"),
 		$additive = $("#app-locations-new_location"),
 		labels = _app_locations_data.model.labels,
 		fields = _app_locations_data.model.fields,
 		markup = ''
 	;
-	if ($additive.length) $additive.remove();
+	if ($additive.length) {$additive.remove();}
 
 	markup += '<h3>' + labels.new_location + '</h3>';
-	var $container = $("<div>", { id: "app-locations-new_location" });
+	const $container = $("<div>", { id: "app-locations-new_location" });
 	$container.append($("<h3>").text(labels.new_location));
 
 	$.each(fields, function (field, label) {
-		var $label = $("<label>", { "for": "app-location-" + field }).text(label);
-		var $input = $("<input>", {
+		const $label = $("<label>", { "for": "app-location-" + field }).text(label);
+		const $input = $("<input>", {
 			type: "text",
 			id: "app-location-" + field,
 			value: ""
@@ -43,7 +43,7 @@ function create_new_location () {
 	$root.after($container);
 
 	$("#app-locations-create_location").on("click", function () {
-		var location = {},
+		const location = {},
 			$submit = $("#app-locations-save_locations"),
 			tmp = $submit.before('<input type="hidden" name="locations[]" id="app-locations-added_location" value="" />'),
 			$location = $("#app-locations-added_location")
@@ -63,7 +63,7 @@ function create_new_location () {
 }
 
 function edit_location () {
-	var $me = $(this),
+	const $me = $(this),
 		$root = $("#app-locations-add_location"),
 		$additive = $("#app-locations-new_location"),
 		$data = $me.parents('li').find("input:hidden"),
@@ -72,14 +72,14 @@ function edit_location () {
 		fields = _app_locations_data.model.fields,
 		markup = ''
 	;
-	if ($additive.length) $additive.remove();
+	if ($additive.length) {$additive.remove();}
 
-	var $container = $("<div>", { id: "app-locations-new_location" });
+	const $container = $("<div>", { id: "app-locations-new_location" });
 	$container.append($("<h3>").text(labels.edit_location));
 
 	$.each(fields, function (field, label) {
-		var $label = $("<label>", { "for": "app-location-" + field }).text(label);
-		var $input = $("<input>", {
+		const $label = $("<label>", { "for": "app-location-" + field }).text(label);
+		const $input = $("<input>", {
 			type: "text",
 			id: "app-location-" + field,
 			value: data[field] || ""
@@ -106,7 +106,7 @@ function edit_location () {
 	$root.after($container);
 
 	$("#app-locations-create_location").on("click", function () {
-		var location = data,
+		const location = data,
 			$submit = $("#app-locations-save_locations")
 		;
 		$.each(fields, function (field, label) {
@@ -124,7 +124,7 @@ function edit_location () {
 }
 
 function delete_location () {
-	var $me = $(this),
+	const $me = $(this),
 		$li = $me.parents('li')
 	;
 	$li.remove();
@@ -133,7 +133,7 @@ function delete_location () {
 
 function save_inline_appointment_data (e, data, $ctx) {
 	$ctx = $ctx.length ? $ctx : $("body");
-	var $location = $ctx.find('[name="location"]'),
+	const $location = $ctx.find('[name="location"]'),
 		location_id = ($location.length ? $location.val() : '')
 	;
 	data['location'] = location_id;
@@ -142,7 +142,7 @@ function save_inline_appointment_data (e, data, $ctx) {
 
 // Init
 $(function () {
-	if ("undefined" == typeof _app_locations_data) return false;
+	if ("undefined" === typeof _app_locations_data) {return false;}
 	$("#app-locations-add_location").on("click", create_new_location);
 	$("#app-locations-list .app-locations-delete").on("click", delete_location);
 	$("#app-locations-list .app-locations-edit").on("click", edit_location);

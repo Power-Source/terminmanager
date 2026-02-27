@@ -21,9 +21,9 @@ jQuery( document).ready( function( $ ) {
         },
 
         bind: function() {
-            var self = this;
+            const self = this;
 
-            var $body = $('body');
+            const $body = $('body');
             $body.on( 'click', '.app_timetable_cell.free, .app_week_timetable_cell.free', function() {
                 self.preConfirmation.apply( self, [ $(this) ] );
             } );
@@ -49,17 +49,17 @@ jQuery( document).ready( function( $ ) {
                 .css( "text-align","center" )
                 .append( this.waitImg );
 
-            var app_value = $element.find(".appointments_take_appointment").val();
+            const app_value = $element.find(".appointments_take_appointment").val();
 
             this.selectedValue = app_value;
 
-            var pre_data = {
+            const pre_data = {
                 action: "pre_confirmation",
                 value: app_value,
                 nonce: AppShortcodeConfirmation.nonce
             };
 
-            var self = this;
+            const self = this;
 
             $.post( AppShortcodeConfirmation.ajaxurl, pre_data, function( response ) {
                 $(".wait_img").remove();
@@ -88,7 +88,7 @@ jQuery( document).ready( function( $ ) {
                     $(".appointments-confirmation-start").html(response.start);
                     $(".appointments-confirmation-end").html(response.end);
 
-                    var confirmationPrice = $(".appointments-confirmation-price");
+                    const confirmationPrice = $(".appointments-confirmation-price");
                     confirmationPrice.html(response.price);
                     if (response.price != "0"){
                         confirmationPrice.show();
@@ -116,7 +116,7 @@ jQuery( document).ready( function( $ ) {
                     }
 
                     $(".appointments-confirmation-button").trigger("focus");
-                    var offset = $(".appointments-confirmation-wrapper").offset();
+                    const offset = $(".appointments-confirmation-wrapper").offset();
                     if (offset && "top" in offset && offset.top) {
                         $(window).scrollTop(offset.top);
                     }
@@ -128,25 +128,25 @@ jQuery( document).ready( function( $ ) {
         confirmation: function() {
             $(".appointments-confirmation-cancel-button").after(this.waitImg);
 
-            var final_value = this.selectedValue;
-            var app_name = $(".appointments-name-field-entry").val();
-            var app_email = $(".appointments-email-field-entry").val();
-            var app_phone = $(".appointments-phone-field-entry").val();
-            var app_address = $(".appointments-address-field-entry").val();
-            var app_city = $(".appointments-city-field-entry").val();
-            var app_note = $(".appointments-note-field-entry").val();
-            var app_gcal = "";
-            var app_warning_text = AppShortcodeConfirmation.warningText;
-            var app_confirmation_text = AppShortcodeConfirmation.confirmationText;
-            var app_gdpr = $('.appointments-gdpr-confirmation input[type=checkbox]');
+            const final_value = this.selectedValue;
+            const app_name = $(".appointments-name-field-entry").val();
+            const app_email = $(".appointments-email-field-entry").val();
+            const app_phone = $(".appointments-phone-field-entry").val();
+            const app_address = $(".appointments-address-field-entry").val();
+            const app_city = $(".appointments-city-field-entry").val();
+            const app_note = $(".appointments-note-field-entry").val();
+            let app_gcal = "";
+            const app_warning_text = AppShortcodeConfirmation.warningText;
+            const app_confirmation_text = AppShortcodeConfirmation.confirmationText;
+            const app_gdpr = $('.appointments-gdpr-confirmation input[type=checkbox]');
 
-            var self = this;
+            const self = this;
 
             if ( this.$gcalEntry.is( ":checked" ) ) {
                 app_gcal = 1;
             }
 
-            var post_data = {
+            const post_data = {
                 action: "post_confirmation",
                 value: final_value,
                 app_name: app_name,
@@ -253,12 +253,12 @@ jQuery( document).ready( function( $ ) {
                 else if ( response ) {
                     $(".appointments-paypal").find(".app_amount").val(response.price);
                     $(".appointments-paypal").find(".app_custom").val(response.app_id);
-                    var old_val = $(".appointments-paypal").find(".app_submit_btn").val();
+                    const old_val = $(".appointments-paypal").find(".app_submit_btn").val();
                     if ( old_val ) {
-                        var new_val = old_val.replace("PRICE",response.price).replace("SERVICE",response.service_name);
+                        const new_val = old_val.replace("PRICE",response.price).replace("SERVICE",response.service_name);
                         $(".appointments-paypal").find(".app_submit_btn").val(new_val);
-                        var old_val2 = $(".appointments-paypal").find(".app_item_name").val();
-                        var new_val2 = old_val2.replace("SERVICE",response.service_name);
+                        const old_val2 = $(".appointments-paypal").find(".app_item_name").val();
+                        const new_val2 = old_val2.replace("SERVICE",response.service_name);
                         $(".appointments-paypal").find(".app_item_name").val(new_val2);
                         $(".appointments-paypal .app_submit_btn").focus();
                     }
