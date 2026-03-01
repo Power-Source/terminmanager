@@ -57,6 +57,11 @@ class App_CRM_Integration {
 		add_action( 'profile_update', array( $this, 'update_crm_customer' ), 10, 2 );
 		add_action( 'WPsCRM_advanced_buttons', array( $this, 'render_crm_customer_backlinks' ), 10, 1 );
 		
+		// Agent/Provider Kopplung (Phase A)
+		add_action( 'user_register', array( $this, 'maybe_sync_agent_provider_link' ), 20, 1 );
+		add_action( 'profile_update', array( $this, 'maybe_sync_agent_provider_link' ), 20, 1 );
+		add_action( 'set_user_role', array( $this, 'maybe_sync_agent_provider_link' ), 20, 1 );
+		
 		// CRM Integrationskarte
 		add_filter( 'WPsCRM_accounting_integrations', array( $this, 'register_crm_accounting_integration' ) );
 		
@@ -74,7 +79,7 @@ class App_CRM_Integration {
 	}
 	
 	/**
-	 * Synchronisiert einen WordPress User zum CRM
+	 * Synchronisiert einen ClassicPress User zum CRM
 	 */
 	public function sync_user_to_crm( $user_id ) {
 		if ( ! $this->get_option( 'sync_customers', true ) ) {
@@ -326,7 +331,7 @@ class App_CRM_Integration {
 	}
 	
 	/**
-	 * Holt CRM Kunden-ID für WordPress User
+	 * Holt CRM Kunden-ID für ClassicPress User
 	 */
 	private function get_crm_customer_id( $user_id ) {
 		$crm_id = get_user_meta( $user_id, '_app_crm_customer_id', true );
@@ -477,6 +482,16 @@ class App_CRM_Integration {
 		echo '<a href="' . esc_url( admin_url( 'admin.php?page=appointments' ) ) . '" class="btn btn-default" style="margin-left:6px">';
 		echo '<i class="glyphicon glyphicon-calendar"></i> ' . esc_html__( 'Terminmanager', 'appointments' );
 		echo '</a>';
+		
+		// PM-Integration: Inbox-Link für Agenten
+		if ( $this->is_pm_active() ) {
+			$inbox_url = $this->get_pm_inbox_url();
+			if ( $inbox_url ) {
+				echo '<a href="' . esc_url( $inbox_url ) . '" class="btn btn-default" style="margin-left:6px">';
+				echo '<i class="glyphicon glyphicon-envelope"></i> ' . esc_html__( 'Nachrichten', 'appointments' );
+				echo '</a>';
+			}
+		}
 	}
 
 	/**
@@ -498,7 +513,7 @@ class App_CRM_Integration {
 	}
 
 	/**
-	 * Ermittelt WordPress User-ID über CRM-Kunde
+	 * Ermittelt ClassicPress User-ID über CRM-Kunde
 	 */
 	private function get_wp_user_id_by_crm_customer( $crm_customer_id, $email = '' ) {
 		$users = get_users( array(
@@ -523,10 +538,238 @@ class App_CRM_Integration {
 	}
 	
 	/**
+	 * Modus-Definitionen für CRM-Agenten und Dienstleister
+	 */
+	public function get_provider_agent_modes() {
+		return array(
+			'independent' => __( 'Unabhängig (Status Quo)', 'appointments' ),
+			'agents_are_providers' => __( 'CRM-Agents sind auch Dienstleister', 'appointments' ),
+			'agents_manage_providers' => __( 'CRM-Agents verwalten Dienstleister', 'appointments' ),
+		);
+	}
+
+	/**
+	 * Liefert den aktiven Agent/Provider Modus
+	 */
+	public function get_provider_agent_mode() {
+		$mode = (string) $this->get_option( 'provider_agent_mode', 'independent' );
+		$allowed = array_keys( $this->get_provider_agent_modes() );
+
+		if ( ! in_array( $mode, $allowed, true ) ) {
+			$mode = 'independent';
+		}
+
+		return $mode;
+	}
+
+	/**
+	 * Sorgt im Modus 2 dafür, dass CRM-Agents als Dienstleister existieren
+	 */
+	public function maybe_sync_agent_provider_link( $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id || 'agents_are_providers' !== $this->get_provider_agent_mode() ) {
+			return;
+		}
+
+		if ( ! $this->is_crm_agent_user( $user_id ) ) {
+			return;
+		}
+
+		$this->ensure_worker_for_user( $user_id );
+	}
+
+	/**
+	 * Ermittelt CRM-Agenten (ohne Admins)
+	 */
+	public function get_crm_agents() {
+		$users = get_users( array(
+			'fields' => array( 'ID', 'display_name', 'user_login' ),
+			'number' => -1,
+		) );
+
+		$agents = array();
+		foreach ( $users as $user ) {
+			if ( $this->is_crm_agent_user( $user->ID ) ) {
+				$agents[] = array(
+					'ID' => absint( $user->ID ),
+					'label' => $user->display_name ? $user->display_name : $user->user_login,
+				);
+			}
+		}
+
+		return $agents;
+	}
+
+	/**
+	 * Gibt Dienstleister für Mapping-UI zurück
+	 */
+	public function get_workers_for_mapping() {
+		$workers = appointments_get_all_workers();
+		$data = array();
+
+		foreach ( $workers as $worker ) {
+			$data[ $worker->ID ] = appointments_get_worker_name( $worker->ID );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Liefert die Agent -> Dienstleister Zuordnung
+	 */
+	public function get_agent_worker_map() {
+		$map = $this->get_option( 'agent_worker_map', array() );
+		if ( ! is_array( $map ) ) {
+			$map = array();
+		}
+
+		return $this->sanitize_agent_worker_map( $map );
+	}
+
+	/**
+	 * Gibt verwaltete Dienstleister eines Agents zurück
+	 */
+	public function get_managed_workers_for_agent( $agent_id ) {
+		$agent_id = absint( $agent_id );
+		$map = $this->get_agent_worker_map();
+		return isset( $map[ $agent_id ] ) ? $map[ $agent_id ] : array();
+	}
+
+	/**
+	 * Prüft, ob ein User einen Worker verwalten darf
+	 * 
+	 * @param int $user_id User-ID (0 = current user)
+	 * @param int $worker_id Worker-ID
+	 * @return bool
+	 */
+	public function can_manage_worker( $user_id = 0, $worker_id = 0 ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$user_id = absint( $user_id );
+		$worker_id = absint( $worker_id );
+
+		if ( ! $user_id || ! $worker_id ) {
+			return false;
+		}
+
+		// Admins dürfen immer
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return true;
+		}
+
+		$mode = $this->get_provider_agent_mode();
+
+		// Modus 1: Independent - nur Admins
+		if ( 'independent' === $mode ) {
+			return false;
+		}
+
+		// Modus 2: Agents sind Provider - Agent darf nur sich selbst verwalten
+		if ( 'agents_are_providers' === $mode ) {
+			return $this->is_crm_agent_user( $user_id ) && $user_id === $worker_id;
+		}
+
+		// Modus 3: Agents verwalten Provider - Agent darf zugewiesene Worker verwalten
+		if ( 'agents_manage_providers' === $mode ) {
+			if ( ! $this->is_crm_agent_user( $user_id ) ) {
+				return false;
+			}
+			$managed_workers = $this->get_managed_workers_for_agent( $user_id );
+			return in_array( $worker_id, $managed_workers, true );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gibt Worker-IDs zurück, die der User verwalten darf
+	 * 
+	 * @param int $user_id User-ID (0 = current user)
+	 * @return array Array of worker IDs or null if unrestricted
+	 */
+	public function get_manageable_worker_ids( $user_id = 0 ) {
+		if ( ! $user_id ) {
+			$user_id = get_current_user_id();
+		}
+
+		$user_id = absint( $user_id );
+
+		if ( ! $user_id ) {
+			return array();
+		}
+
+		// Admins haben keine Einschränkungen
+		if ( user_can( $user_id, 'manage_options' ) ) {
+			return null; // null = keine Einschränkung
+		}
+
+		$mode = $this->get_provider_agent_mode();
+
+		// Modus 1: Independent - keine Worker für normale User
+		if ( 'independent' === $mode ) {
+			return array();
+		}
+
+		// Modus 2: Agents sind Provider - nur eigener Worker
+		if ( 'agents_are_providers' === $mode ) {
+			if ( $this->is_crm_agent_user( $user_id ) && appointments_is_worker( $user_id ) ) {
+				return array( $user_id );
+			}
+			return array();
+		}
+
+		// Modus 3: Agents verwalten Provider
+		if ( 'agents_manage_providers' === $mode ) {
+			if ( $this->is_crm_agent_user( $user_id ) ) {
+				return $this->get_managed_workers_for_agent( $user_id );
+			}
+			return array();
+		}
+
+		return array();
+	}
+
+	/**
 	 * Registriert Settings
 	 */
 	public function register_settings() {
-		register_setting( 'app_crm_integration', 'app_crm_integration' );
+		register_setting( 'app_crm_integration', 'app_crm_integration', array( $this, 'sanitize_settings' ) );
+	}
+
+	/**
+	 * Sanitizer für Integrationsoptionen
+	 */
+	public function sanitize_settings( $input ) {
+		$input = is_array( $input ) ? $input : array();
+
+		$clean = array(
+			'sync_customers' => empty( $input['sync_customers'] ) ? 0 : 1,
+			'sync_appointments' => empty( $input['sync_appointments'] ) ? 0 : 1,
+			'auto_create_invoices' => empty( $input['auto_create_invoices'] ) ? 0 : 1,
+			'provider_agent_mode' => 'independent',
+			'agent_worker_map' => array(),
+		);
+
+		$mode = isset( $input['provider_agent_mode'] ) ? sanitize_key( $input['provider_agent_mode'] ) : 'independent';
+		if ( array_key_exists( $mode, $this->get_provider_agent_modes() ) ) {
+			$clean['provider_agent_mode'] = $mode;
+		}
+
+		if ( isset( $input['agent_worker_map'] ) ) {
+			$clean['agent_worker_map'] = $this->sanitize_agent_worker_map( $input['agent_worker_map'] );
+		}
+
+		$this->options = $clean;
+
+		if ( 'agents_are_providers' === $clean['provider_agent_mode'] ) {
+			foreach ( $this->get_crm_agents() as $agent ) {
+				$this->ensure_worker_for_user( $agent['ID'] );
+			}
+		}
+
+		return $clean;
 	}
 	
 	/**
@@ -554,6 +797,10 @@ class App_CRM_Integration {
 			'synced_customers' => 0,
 			'crm_appointments' => 0,
 			'synced_appointments' => 0,
+			'crm_agents' => 0,
+			'providers' => 0,
+			'mapped_agents' => 0,
+			'pm_active' => $this->is_pm_active(),
 		);
 		
 		if ( ! $this->is_crm_active ) {
@@ -573,7 +820,211 @@ class App_CRM_Integration {
 		$meta_table = $wpdb->postmeta;
 		$stats['synced_appointments'] = $wpdb->get_var( "SELECT COUNT(*) FROM $meta_table WHERE meta_key = '_app_crm_agenda_id'" );
 		
+		$stats['crm_agents'] = count( $this->get_crm_agents() );
+		$stats['providers'] = count( appointments_get_all_workers() );
+		$stats['mapped_agents'] = count( $this->get_agent_worker_map() );
+		
 		return $stats;
+	}
+
+	/**
+	 * Prüft, ob ein User als CRM-Agent behandelt wird
+	 */
+	public function is_crm_agent_user( $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		$is_agent = user_can( $user_id, 'manage_crm' ) && ! user_can( $user_id, 'manage_options' );
+
+		return (bool) apply_filters( 'app_crm_is_agent_user', $is_agent, $user_id );
+	}
+
+	/**
+	 * Stellt sicher, dass ein User als Dienstleister angelegt ist
+	 */
+	private function ensure_worker_for_user( $user_id ) {
+		$user_id = absint( $user_id );
+		if ( ! $user_id ) {
+			return false;
+		}
+
+		if ( appointments_is_worker( $user_id ) ) {
+			return true;
+		}
+
+		$created = appointments_insert_worker( array(
+			'ID' => $user_id,
+			'services_provided' => array(),
+		) );
+
+		if ( $created ) {
+			appointments_delete_worker_cache( $user_id );
+		}
+
+		return (bool) $created;
+	}
+
+	/**
+	 * Sanitizer für Agent -> Dienstleister Mapping
+	 */
+	private function sanitize_agent_worker_map( $map ) {
+		if ( ! is_array( $map ) ) {
+			return array();
+		}
+
+		$clean = array();
+		foreach ( $map as $agent_id => $worker_ids ) {
+			$agent_id = absint( $agent_id );
+			if ( ! $agent_id || ! $this->is_crm_agent_user( $agent_id ) ) {
+				continue;
+			}
+
+			if ( ! is_array( $worker_ids ) ) {
+				$worker_ids = array( $worker_ids );
+			}
+
+			$worker_ids = array_unique( array_filter( array_map( 'absint', $worker_ids ) ) );
+			$valid_workers = array();
+			foreach ( $worker_ids as $worker_id ) {
+				if ( appointments_is_worker( $worker_id ) ) {
+					$valid_workers[] = $worker_id;
+				}
+			}
+
+			$clean[ $agent_id ] = array_values( $valid_workers );
+		}
+
+		return $clean;
+	}
+
+	// ====================
+	// PM-Integration Helpers
+	// ====================
+
+	/**
+	 * Prüft, ob Private-Messaging Plugin aktiv ist
+	 */
+	public function is_pm_active() {
+		return class_exists( 'MMessaging' ) && function_exists( 'mm_display_contact_button' );
+	}
+
+	/**
+	 * Gibt URL zur PM-Inbox zurück
+	 * 
+	 * @param string $box inbox|sent|archive|setting
+	 * @return string|false
+	 */
+	public function get_pm_inbox_url( $box = 'inbox' ) {
+		if ( ! $this->is_pm_active() ) {
+			return false;
+		}
+
+		// Suche Seite mit [message_inbox] Shortcode
+		$pages = get_posts( array(
+			'post_type' => 'page',
+			'post_status' => 'publish',
+			's' => '[message_inbox]',
+			'posts_per_page' => 1,
+		) );
+
+		if ( empty( $pages ) ) {
+			return false;
+		}
+
+		$url = get_permalink( $pages[0]->ID );
+		if ( 'inbox' !== $box ) {
+			$url = add_query_arg( 'box', $box, $url );
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Gibt verantwortlichen Agent für einen Worker zurück (Modus 3)
+	 * 
+	 * @param int $worker_id Worker-ID
+	 * @return int|false Agent User-ID oder false
+	 */
+	public function get_agent_for_worker( $worker_id ) {
+		$worker_id = absint( $worker_id );
+		if ( ! $worker_id ) {
+			return false;
+		}
+
+		$mode = $this->get_provider_agent_mode();
+
+		// Modus 2: Worker ist sein eigener Agent
+		if ( 'agents_are_providers' === $mode ) {
+			if ( $this->is_crm_agent_user( $worker_id ) ) {
+				return $worker_id;
+			}
+			return false;
+		}
+
+		// Modus 3: Suche Agent der diesen Worker verwaltet
+		if ( 'agents_manage_providers' === $mode ) {
+			$map = $this->get_agent_worker_map();
+			foreach ( $map as $agent_id => $worker_ids ) {
+				if ( in_array( $worker_id, $worker_ids, true ) ) {
+					return absint( $agent_id );
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gibt alle Worker-IDs zurück, für die ein Agent verantwortlich ist
+	 * 
+	 * @param int $agent_id Agent User-ID
+	 * @return array Worker-IDs
+	 */
+	public function get_workers_for_agent( $agent_id ) {
+		$agent_id = absint( $agent_id );
+		if ( ! $agent_id || ! $this->is_crm_agent_user( $agent_id ) ) {
+			return array();
+		}
+
+		$mode = $this->get_provider_agent_mode();
+
+		// Modus 2: Agent ist sein eigener Worker
+		if ( 'agents_are_providers' === $mode ) {
+			if ( appointments_is_worker( $agent_id ) ) {
+				return array( $agent_id );
+			}
+			return array();
+		}
+
+		// Modus 3: Workers aus Mapping
+		if ( 'agents_manage_providers' === $mode ) {
+			return $this->get_managed_workers_for_agent( $agent_id );
+		}
+
+		return array();
+	}
+
+	/**
+	 * Erstellt PM Contact-Button HTML für einen User
+	 * 
+	 * @param int $user_id Ziel User-ID
+	 * @param string $text Button-Text
+	 * @param string $subject Nachrichten-Betreff
+	 * @param string $class CSS-Klassen
+	 * @return string HTML oder leerer String
+	 */
+	public function render_pm_contact_button( $user_id, $text = '', $subject = '', $class = 'button' ) {
+		if ( ! $this->is_pm_active() || ! $user_id ) {
+			return '';
+		}
+
+		if ( empty( $text ) ) {
+			$text = __( 'Nachricht senden', 'appointments' );
+		}
+
+		return mm_display_contact_button( $user_id, $class, $text, $subject, false );
 	}
 }
 

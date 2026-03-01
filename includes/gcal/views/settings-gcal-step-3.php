@@ -1,5 +1,5 @@
 <h3><?php _e( 'Google Calendar API: Select Your Calendar', 'appointments' ); ?></h3>
-<p><?php _e( 'Select the Calendar you want to work with Appointments. This setting is optional as every Service Provider can select their own calendar from their Profile Settings.', 'appointments' ); ?></p>
+<p><?php _e( 'Select the Calendar you want to work with Appointments. This setting is optional as every Dienstleister can select their own calendar from their Profile Settings.', 'appointments' ); ?></p>
 
 <table class="form-table">
 	<tr>

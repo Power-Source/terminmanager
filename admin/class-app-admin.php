@@ -557,9 +557,23 @@ public function get_service() {
 			&& isset( $_POST['id'] )
 			&& wp_verify_nonce( $_POST['_wpnonce'], 'worker-'.$_POST['id'] )
 		) {
-			$worker = appointments_get_worker( $_POST['id'] );
-			$worker->display_name = $worker->get_name();
-			wp_send_json_success( $worker );
+			$worker_id = absint( $_POST['id'] );
+			
+			// CRM-Integration: Berechtigungsprüfung
+			if ( class_exists( 'App_CRM_Integration' ) ) {
+				$integration = App_CRM_Integration::get_instance();
+				if ( ! $integration->can_manage_worker( 0, $worker_id ) ) {
+					wp_send_json_error( array(
+						'message' => __( 'Du hast keine Berechtigung, diesen Dienstleister zu bearbeiten.', 'appointments' ),
+					) );
+				}
+			}
+			
+			$worker = appointments_get_worker( $worker_id );
+			if ( $worker ) {
+				$worker->display_name = $worker->get_name();
+				wp_send_json_success( $worker );
+			}
 		}
 		wp_send_json_error( $data );
 	}

@@ -51,8 +51,8 @@ class Appointments_Admin_Settings_Page {
 				'edit-service' => false,
 			),
 			'workers' => array(
-				'workers' => __( 'Service Provider', 'appointments' ),
-				'new-worker' => __( 'Erstelle neuen Service Provider', 'appointments' ),
+				'workers' => __( 'Dienstleister', 'appointments' ),
+				'new-worker' => __( 'Erstelle neuen Dienstleister', 'appointments' ),
 				'edit-worker' => false,
 			),
 		);
@@ -95,9 +95,9 @@ class Appointments_Admin_Settings_Page {
 				'classes' => $classes,
 				'presets' => $presets,
 				'messages' => array(
-					'select_service_provider' => __( 'Wähle mindestens einen Service Provider aus', 'appointments' ),
+					'select_service_provider' => __( 'Wähle mindestens einen Dienstleister aus', 'appointments' ),
 					'workers' => array(
-						'delete_confirmation' => __( 'Sicher das Du diesen Service Provider löschen willst?', 'appointments' ),
+						'delete_confirmation' => __( 'Sicher das Du diesen Dienstleister löschen willst?', 'appointments' ),
 					),
 					'service' => array(
 						'delete_confirmation' => __( 'Sicher das Du diesen Service löschen willst?', 'appointments' ),
@@ -244,7 +244,7 @@ class Appointments_Admin_Settings_Page {
 				global $appointments_workers_list;
 				$option = 'per_page';
 				$args = array(
-					'label' => __( 'Anzahl der Service Provider pro Seite', 'appointments' ),
+					'label' => __( 'Anzahl der Dienstleister pro Seite', 'appointments' ),
 					'default' => get_user_option( 'app_workers_per_page', 20 ),
 					'option' => 'app_workers_per_page',
 				);
@@ -620,11 +620,22 @@ class Appointments_Admin_Settings_Page {
 			return;
 		}
 
+		// CRM-Integration: Berechtigungsprüfung vorbereiten
+		$integration = null;
+		if ( class_exists( 'App_CRM_Integration' ) ) {
+			$integration = App_CRM_Integration::get_instance();
+		}
+
 		foreach ( $_POST['workers'] as $worker_id => $worker ) {
 			$new_worker_id = absint( $worker['user'] );
 			$worker_id = absint( $worker_id );
 
 			if ( appointments_is_worker( $worker_id ) ) {
+				// CRM-Integration: Berechtigung prüfen
+				if ( $integration && ! $integration->can_manage_worker( 0, $worker_id ) ) {
+					continue; // Überspringen wenn keine Berechtigung
+				}
+				
 				// Update
 				if ( ( $new_worker_id != $worker_id ) && ! empty( $worker['services_provided'] ) ) {
 					// We are trying to chage the user ID
@@ -680,6 +691,15 @@ class Appointments_Admin_Settings_Page {
 		if ( false === $_worker ) {
 			return false;
 		}
+		
+		// CRM-Integration: Berechtigungsprüfung
+		if ( class_exists( 'App_CRM_Integration' ) ) {
+			$integration = App_CRM_Integration::get_instance();
+			if ( ! $integration->can_manage_worker( 0, $ID ) ) {
+				return false;
+			}
+		}
+		
 		do_action( 'app-workers-before_save' );
 		/**
 		 * update

@@ -894,7 +894,7 @@ msgid "Client %s cancelled appointment with ID: %s"
 msgstr ""
 
 #: admin/class-app-admin-user-profile.php:62
-msgid "Service Provider %s manually confirmed appointment with ID: %s"
+msgid "Dienstleister %s manually confirmed appointment with ID: %s"
 msgstr ""
 
 #: admin/class-app-admin-user-profile.php:95
@@ -1095,7 +1095,7 @@ msgstr ""
 #: admin/class-app-list-table-workers.php:158
 #: admin/views/page-settings-tab-workers-section-edit-worker.php:14
 #: admin/views/page-settings-tab-workers-section-new-worker.php:30
-msgid "Service Provider"
+msgid "Dienstleister"
 msgstr ""
 
 #: admin/class-app-list-table-workers.php:159
@@ -1454,7 +1454,7 @@ msgstr ""
 
 #: admin/pages/class-admin-settings-page.php:55
 #: admin/views/page-settings-tab-workers-section-new-worker.php:98
-msgid "Add new Service Provider"
+msgid "Add new Dienstleister"
 msgstr ""
 
 #: admin/pages/class-admin-settings-page.php:96
@@ -1463,7 +1463,7 @@ msgid "Please, select at least one service provided"
 msgstr ""
 
 #: admin/pages/class-admin-settings-page.php:98
-msgid "Are you sure to delete this Service Provider?"
+msgid "Are you sure to delete this Dienstleister?"
 msgstr ""
 
 #: admin/pages/class-admin-settings-page.php:101
@@ -2142,7 +2142,7 @@ msgid ""
 "made from front end in pending status. This email is only sent if you do "
 "not require a payment, that is, if your approval is required. Note: "
 "Notification email is also sent to the service provider, if a provider is "
-"namely selected by the client, and \"Allow Service Provider Confirm Own "
+"namely selected by the client, and \"Allow Dienstleister Confirm Own "
 "Appointments\" is set as Yes."
 msgstr ""
 
@@ -2503,7 +2503,7 @@ msgid ""
 msgstr ""
 
 #: admin/views/page-settings-tab-workers.php:7
-msgid "Service Provider Added"
+msgid "Dienstleister Added"
 msgstr ""
 
 #: admin/views/page-settings-tab-workers.php:27
@@ -2893,7 +2893,7 @@ msgid "Sorry, there was a problem with your request!"
 msgstr ""
 
 #: includes/class-app-ajax.php:1210 includes/class-app-ajax.php:1236
-msgid "Service Provider was successfuly deleted."
+msgid "Dienstleister was successfuly deleted."
 msgstr ""
 
 #: includes/class-app-appointment.php:1223
@@ -2936,7 +2936,7 @@ msgstr ""
 msgid ""
 "Client Name: CLIENT\n"
 "Service Name: SERVICE\n"
-"Service Provider Name: SERVICE_PROVIDER\n"
+"Dienstleister Name: SERVICE_PROVIDER\n"
 msgstr ""
 
 #: includes/class-app-gdpr.php:147
@@ -3835,7 +3835,7 @@ msgstr ""
 #: includes/gcal/views/settings-gcal-step-3.php:2
 msgid ""
 "Select the Calendar you want to work with Appointments. This setting is "
-"optional as every Service Provider can select their own calendar from their "
+"optional as every Dienstleister can select their own calendar from their "
 "Profile Settings."
 msgstr ""
 

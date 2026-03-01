@@ -38,7 +38,7 @@ if ( empty( $pages ) ) {
                 <div class="app-range-slider">
                     <input type="range" id="service-capacity-slider-new" data-target-id="service-capacity-new" min="0" max="<?php echo esc_attr( $number_of_workers ); ?>" value="0" />
                 </div>
-                <p class="description"><?php esc_html_e( 'Wenn Du "Servicekapazität" auf "0" einstellst, wird dies nur durch die Anzahl der verfügbaren Service Provider begrenzt.', 'appointments' ); ?></p>
+                <p class="description"><?php esc_html_e( 'Wenn Du "Servicekapazität" auf "0" einstellst, wird dies nur durch die Anzahl der verfügbaren Dienstleister begrenzt.', 'appointments' ); ?></p>
 <?php } ?>
 			</td>
 		</tr>

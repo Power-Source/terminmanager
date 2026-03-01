@@ -59,7 +59,7 @@ class Appointments_Admin_User_Profile {
 			if ( isset( $_POST['app_confirm'] ) && is_array( $_POST['app_confirm'] ) && ! empty( $_POST['app_confirm'] ) ) {
 				foreach ( $_POST['app_confirm'] as $app_id => $value ) {
 					if ( appointments_update_appointment_status( $app_id, 'confirmed' ) ) {
-						$appointments->log( sprintf( __( 'Service Provider %s manually confirmed appointment with ID: %s', 'appointments' ), appointments_get_worker_name( $current_user->ID ), $app_id ) );
+						$appointments->log( sprintf( __( 'Dienstleister %s manually confirmed appointment with ID: %s', 'appointments' ), appointments_get_worker_name( $current_user->ID ), $app_id ) );
 					}
 				}
 			}

@@ -109,6 +109,35 @@ class Appointments_WP_List_Table_Workers extends WP_List_Table {
 		if ( false !== $page ) {
 			$actions['page_view'] = $page;
 		}
+		
+		// CRM-Integration: PM Contact-Button für Agenten
+		if ( class_exists( 'App_CRM_Integration' ) && false !== $user ) {
+			$integration = App_CRM_Integration::get_instance();
+			$current_user_id = get_current_user_id();
+			
+			// Zeige PM-Link wenn PM aktiv ist UND User nicht sich selbst kontaktiert
+			if ( $integration->is_pm_active() && $current_user_id !== $item->ID ) {
+				$mode = $integration->get_provider_agent_mode();
+				
+				// Modus 3: Agent kann seine zugewiesenen Provider kontaktieren
+				if ( 'agents_manage_providers' === $mode ) {
+					if ( $integration->is_crm_agent_user( $current_user_id ) ) {
+						if ( $integration->can_manage_worker( $current_user_id, $item->ID ) ) {
+							$actions['message'] = sprintf(
+								'<span class="app-pm-contact">%s</span>',
+								$integration->render_pm_contact_button(
+									$item->ID,
+									__( 'Nachricht', 'appointments' ),
+									sprintf( __( 'Betreff: Dienstleister %s', 'appointments' ), $user->display_name ),
+									''
+								)
+							);
+						}
+					}
+				}
+			}
+		}
+		
 		$value = sprintf( $edit_link, esc_html( false === $user? __( '[wrong user]', 'appointments' ):$user->display_name ) );
 		return sprintf( '<strong>%s</strong>%s', $value, $this->row_actions( $actions ) );
 	}
@@ -192,8 +221,21 @@ class Appointments_WP_List_Table_Workers extends WP_List_Table {
 			&& is_array( $_POST[ $singular ] )
 			&& wp_verify_nonce( $_POST['_wpnonce'], 'bulk-'.$this->_args['plural'] )
 		) {
+			// CRM-Integration: Berechtigungsprüfung
+			$integration = null;
+			if ( class_exists( 'App_CRM_Integration' ) ) {
+				$integration = App_CRM_Integration::get_instance();
+			}
+			
 			foreach ( $_POST[ $singular ] as $ID ) {
-				appointments_delete_worker( $ID );
+				$worker_id = absint( $ID );
+				
+				// Berechtigung prüfen
+				if ( $integration && ! $integration->can_manage_worker( 0, $worker_id ) ) {
+					continue; // Überspringen wenn keine Berechtigung
+				}
+				
+				appointments_delete_worker( $worker_id );
 			}
 		}
 	}
@@ -212,16 +254,55 @@ class Appointments_WP_List_Table_Workers extends WP_List_Table {
 		$sortable = $this->get_sortable_columns();
 		$this->_column_headers = array( $columns, $hidden, $sortable );
 		$this->process_bulk_action();
-		$total_items = appointments_get_workers( array( 'count' => true ) );
-		$current_page = $this->get_pagenum();
-		$offset = ( $current_page - 1 ) * $per_page;
+		
+		// CRM-Integration: Worker nach Berechtigung filtern
+		$worker_ids_filter = null;
+		if ( class_exists( 'App_CRM_Integration' ) ) {
+			$integration = App_CRM_Integration::get_instance();
+			$manageable_ids = $integration->get_manageable_worker_ids();
+			if ( is_array( $manageable_ids ) ) {
+				$worker_ids_filter = $manageable_ids;
+			}
+		}
+		
 		$args = array(
 			'orderby' => 'name',
-			'offset' => $offset,
-			'limit' => $per_page,
 		);
-		$data = appointments_get_workers( $args );
-		$this->items = $data;
+		
+		// Wenn Filter aktiv, nur erlaubte Worker zählen/laden
+		if ( is_array( $worker_ids_filter ) ) {
+			if ( empty( $worker_ids_filter ) ) {
+				// Agent hat keine Worker zugewiesen
+				$total_items = 0;
+				$this->items = array();
+			} else {
+				// Alle Worker mit IDs in Filter holen
+				$all_workers = appointments_get_workers( $args );
+				$filtered_workers = array();
+				foreach ( $all_workers as $worker ) {
+					if ( in_array( $worker->ID, $worker_ids_filter, true ) ) {
+						$filtered_workers[] = $worker;
+					}
+				}
+				
+				$total_items = count( $filtered_workers );
+				$current_page = $this->get_pagenum();
+				$offset = ( $current_page - 1 ) * $per_page;
+				
+				// Manuell paginieren
+				$this->items = array_slice( $filtered_workers, $offset, $per_page );
+			}
+		} else {
+			// Admin: alle Worker
+			$total_items = appointments_get_workers( array( 'count' => true ) );
+			$current_page = $this->get_pagenum();
+			$offset = ( $current_page - 1 ) * $per_page;
+			$args['offset'] = $offset;
+			$args['limit'] = $per_page;
+			$data = appointments_get_workers( $args );
+			$this->items = $data;
+		}
+		
 		/**
 		 * REQUIRED. We also have to register our pagination options & calculations.
 		 */

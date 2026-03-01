@@ -27,7 +27,7 @@ $workers_dropdown = wp_dropdown_users( array(
 	<table class="form-table">
 		<tr>
 			<th scope="row">
-				<label for="worker-user"><?php _e( 'Service Provider', 'appointments' ); ?></label>
+				<label for="worker-user"><?php _e( 'Dienstleister', 'appointments' ); ?></label>
 			</th>
 			<td>
 				<?php echo $workers_dropdown; ?>

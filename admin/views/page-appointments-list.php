@@ -85,6 +85,57 @@
 											<a href="javascript:void(0)" class="app-inline-edit" data-app-id="<?php echo $app->ID; ?>">
 												<?php echo 'reserved' == $app->status ? __('Siehe Details (Kann nicht bearbeitet werden)', 'appointments') : __('Siehe Details und Bearbeiten', 'appointments') ?>
 											</a>
+											<?php
+											// CRM-Integration: PM Contact-Buttons
+											if ( class_exists( 'App_CRM_Integration' ) ) {
+												$integration = App_CRM_Integration::get_instance();
+												$current_user_id = get_current_user_id();
+												
+												if ( $integration->is_pm_active() ) {
+													// Kunde kontaktieren: Wenn current user der Worker ist
+													if ( $app->worker && $app->worker == $current_user_id && $app->user && $app->user != $current_user_id ) {
+														$client_name = stripslashes( $app->get_client_name() );
+														$service_name = $app->get_service_name();
+														$subject = sprintf( 
+															__( 'Termin #%d: %s', 'appointments' ), 
+															$app->ID, 
+															$service_name 
+														);
+														echo ' | <span class="app-pm-contact-client">';
+														echo $integration->render_pm_contact_button(
+															$app->user,
+															__( 'Kunde kontaktieren', 'appointments' ),
+															$subject,
+															''
+														);
+														echo '</span>';
+													}
+													
+													// Provider kontaktieren: Wenn Agent diesen Worker verwaltet
+													$mode = $integration->get_provider_agent_mode();
+													if ( 'agents_manage_providers' === $mode && $app->worker && $app->worker != $current_user_id ) {
+														if ( $integration->is_crm_agent_user( $current_user_id ) ) {
+															if ( $integration->can_manage_worker( $current_user_id, $app->worker ) ) {
+																$worker_name = appointments_get_worker_name( $app->worker );
+																$subject = sprintf(
+																	__( 'Termin #%d mit Dienstleister %s', 'appointments' ),
+																	$app->ID,
+																	$worker_name
+																);
+																echo ' | <span class="app-pm-contact-worker">';
+																echo $integration->render_pm_contact_button(
+																	$app->worker,
+																	__( 'Dienstleister kontaktieren', 'appointments' ),
+																	$subject,
+																	''
+																);
+																echo '</span>';
+															}
+														}
+													}
+												}
+											}
+											?>
 											<img class="waiting" style="display:none;" src="<?php echo admin_url('images/spinner.gif')?>" alt="">
 										</div>
 									<?php elseif ('service' === $key ): ?>

@@ -15,11 +15,6 @@ $options = get_option( 'app_crm_integration', array() );
 $sync_customers = isset( $options['sync_customers'] ) ? $options['sync_customers'] : false;
 $sync_appointments = isset( $options['sync_appointments'] ) ? $options['sync_appointments'] : false;
 $auto_create_invoices = isset( $options['auto_create_invoices'] ) ? $options['auto_create_invoices'] : false;
-$provider_agent_mode = $integration->get_provider_agent_mode();
-$provider_agent_modes = $integration->get_provider_agent_modes();
-$crm_agents = $integration->get_crm_agents();
-$workers = $integration->get_workers_for_mapping();
-$agent_worker_map = $integration->get_agent_worker_map();
 ?>
 
 <div class="app-crm-integration-settings">
@@ -77,27 +72,6 @@ $agent_worker_map = $integration->get_agent_worker_map();
 				<p><?php _e( 'Sync-Status', 'appointments' ); ?></p>
 			</div>
 		</div>
-		
-		<?php if ( $stats['pm_active'] ): ?>
-		<div class="app-crm-stat-card">
-			<div class="app-crm-stat-icon">
-				<span class="dashicons dashicons-email"></span>
-			</div>
-			<div class="app-crm-stat-content">
-				<?php 
-				$inbox_url = $integration->get_pm_inbox_url();
-				if ( $inbox_url ): 
-				?>
-					<a href="<?php echo esc_url( $inbox_url ); ?>" class="button button-secondary" style="margin-top:10px;">
-						<?php _e( 'Zur Inbox', 'appointments' ); ?>
-					</a>
-				<?php else: ?>
-					<p style="color:#999;"><?php _e( 'Inbox-Seite nicht gefunden', 'appointments' ); ?></p>
-				<?php endif; ?>
-				<p><?php _e( 'Private Nachrichten', 'appointments' ); ?></p>
-			</div>
-		</div>
-		<?php endif; ?>
 	</div>
 	
 	<form method="post" action="options.php" class="app-crm-settings-form">
@@ -114,7 +88,7 @@ $agent_worker_map = $integration->get_agent_worker_map();
 				<td>
 					<label>
 						<input type="checkbox" id="sync_customers" name="app_crm_integration[sync_customers]" value="1" <?php checked( $sync_customers, 1 ); ?>>
-						<?php _e( 'ClassicPress-Benutzer automatisch als CRM-Kunden synchronisieren', 'appointments' ); ?>
+						<?php _e( 'WordPress-Benutzer automatisch als CRM-Kunden synchronisieren', 'appointments' ); ?>
 					</label>
 					<p class="description">
 						<?php _e( 'Wenn aktiviert, werden neue Benutzer automatisch im CRM als Kunden angelegt und bei Änderungen aktualisiert.', 'appointments' ); ?>
@@ -137,75 +111,6 @@ $agent_worker_map = $integration->get_agent_worker_map();
 					<p class="description">
 						<?php _e( 'Wenn aktiviert, werden gebuchte Termine automatisch in die CRM-Agenda eingetragen und bei Änderungen aktualisiert.', 'appointments' ); ?>
 					</p>
-				</td>
-			</tr>
-			
-			<!-- Agent / Dienstleister Betriebsmodus -->
-			<tr>
-				<th scope="row">
-					<label for="provider_agent_mode">
-						<?php _e( 'Agent & Dienstleister Modus', 'appointments' ); ?>
-					</label>
-				</th>
-				<td>
-					<select id="provider_agent_mode" name="app_crm_integration[provider_agent_mode]" style="min-width: 360px;">
-						<?php foreach ( $provider_agent_modes as $mode_key => $mode_label ) : ?>
-							<option value="<?php echo esc_attr( $mode_key ); ?>" <?php selected( $provider_agent_mode, $mode_key ); ?>>
-								<?php echo esc_html( $mode_label ); ?>
-							</option>
-						<?php endforeach; ?>
-					</select>
-					<p class="description">
-						<?php _e( 'Steuert, wie CRM-Agents und Terminmanager-Dienstleister miteinander verbunden werden.', 'appointments' ); ?>
-					</p>
-					<p class="description">
-						<strong><?php _e( 'Modus 2:', 'appointments' ); ?></strong>
-						<?php _e( 'CRM-Agents werden automatisch auch als Dienstleister angelegt.', 'appointments' ); ?>
-					</p>
-				</td>
-			</tr>
-
-			<!-- Agent -> Dienstleister Mapping für Modus 3 -->
-			<tr id="app-crm-agent-map-row" <?php echo 'agents_manage_providers' === $provider_agent_mode ? '' : 'style="display:none"'; ?>>
-				<th scope="row">
-					<?php _e( 'Agent → Dienstleister Mapping', 'appointments' ); ?>
-				</th>
-				<td>
-					<?php if ( empty( $crm_agents ) ) : ?>
-						<p class="description"><?php _e( 'Keine CRM-Agents gefunden (manage_crm ohne Administrator).', 'appointments' ); ?></p>
-					<?php elseif ( empty( $workers ) ) : ?>
-						<p class="description"><?php _e( 'Keine Dienstleister vorhanden. Lege zuerst Dienstleister im Terminmanager an.', 'appointments' ); ?></p>
-					<?php else : ?>
-						<table class="widefat striped" style="max-width: 850px;">
-							<thead>
-								<tr>
-									<th style="width:220px;"><?php _e( 'CRM-Agent', 'appointments' ); ?></th>
-									<th><?php _e( 'Verwaltete Dienstleister', 'appointments' ); ?></th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php foreach ( $crm_agents as $agent ) :
-									$assigned_workers = isset( $agent_worker_map[ $agent['ID'] ] ) ? $agent_worker_map[ $agent['ID'] ] : array();
-								?>
-								<tr>
-									<td><strong><?php echo esc_html( $agent['label'] ); ?></strong></td>
-									<td>
-										<select name="app_crm_integration[agent_worker_map][<?php echo esc_attr( $agent['ID'] ); ?>][]" multiple="multiple" size="6" style="min-width: 420px;">
-											<?php foreach ( $workers as $worker_id => $worker_name ) : ?>
-												<option value="<?php echo esc_attr( $worker_id ); ?>" <?php selected( in_array( (int) $worker_id, $assigned_workers, true ) ); ?>>
-													<?php echo esc_html( $worker_name ); ?>
-												</option>
-											<?php endforeach; ?>
-										</select>
-										<p class="description" style="margin-top:6px;">
-											<?php _e( 'Mehrfachauswahl mit Strg/Cmd. Diese Zuordnung wird in Phase B für Berechtigungen verwendet.', 'appointments' ); ?>
-										</p>
-									</td>
-								</tr>
-								<?php endforeach; ?>
-							</tbody>
-						</table>
-					<?php endif; ?>
 				</td>
 			</tr>
 			
@@ -385,18 +290,6 @@ $agent_worker_map = $integration->get_agent_worker_map();
 
 <script>
 jQuery(document).ready(function($) {
-	function toggleAgentMapRow() {
-		var mode = $('#provider_agent_mode').val();
-		if (mode === 'agents_manage_providers') {
-			$('#app-crm-agent-map-row').show();
-		} else {
-			$('#app-crm-agent-map-row').hide();
-		}
-	}
-
-	$('#provider_agent_mode').on('change', toggleAgentMapRow);
-	toggleAgentMapRow();
-
 	// Kunden synchronisieren
 	$('#app-crm-sync-customers').on('click', function() {
 		var button = $(this);

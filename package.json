@@ -2,7 +2,7 @@
   "name": "terminmanager",
   "version": "1.0.0",
   "private": true,
-  "description": "WordPress Terminmanager Plugin",
+  "description": "ClassicPress Terminmanager Plugin",
   "scripts": {
     "lint": "eslint '**/*.js' --ignore-pattern 'node_modules/' --ignore-pattern 'assets/js/vendor/'",
     "lint:fix": "eslint '**/*.js' --ignore-pattern 'node_modules/' --ignore-pattern 'assets/js/vendor/' --fix"
