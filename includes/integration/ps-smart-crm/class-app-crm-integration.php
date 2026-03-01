@@ -55,6 +55,10 @@ class App_CRM_Integration {
 		// Kunden-Synchronisation
 		add_action( 'user_register', array( $this, 'sync_user_to_crm' ), 10, 1 );
 		add_action( 'profile_update', array( $this, 'update_crm_customer' ), 10, 2 );
+		add_action( 'WPsCRM_advanced_buttons', array( $this, 'render_crm_customer_backlinks' ), 10, 1 );
+		
+		// CRM Integrationskarte
+		add_filter( 'WPsCRM_accounting_integrations', array( $this, 'register_crm_accounting_integration' ) );
 		
 		// Termin-Synchronisation
 		add_action( 'wpmudev_appointments_insert_appointment', array( $this, 'sync_appointment_to_crm' ), 10, 1 );
@@ -216,7 +220,7 @@ class App_CRM_Integration {
 			'end_date' => $appointment->end,
 			'data_agenda' => date( 'Y-m-d', strtotime( $appointment->start ) ),
 			'ora_agenda' => date( 'H:i:s', strtotime( $appointment->start ) ),
-			'annotazioni' => $appointment->note ?: '',
+			'annotazioni' => $this->build_scheduler_note( $app_id, $appointment->note ?: '' ),
 			'einstiegsdatum' => current_time( 'mysql' ),
 			'tipo_agenda' => 2, // 2 = Termin/Appointment
 			'fatto' => $this->map_appointment_status( $appointment->status ),
@@ -264,7 +268,7 @@ class App_CRM_Integration {
 			'end_date' => $appointment->end,
 			'data_agenda' => date( 'Y-m-d', strtotime( $appointment->start ) ),
 			'ora_agenda' => date( 'H:i:s', strtotime( $appointment->start ) ),
-			'annotazioni' => $appointment->note ?: '',
+			'annotazioni' => $this->build_scheduler_note( $app_id, $appointment->note ?: '' ),
 			'fatto' => $this->map_appointment_status( $appointment->status ),
 		);
 		
@@ -435,6 +439,87 @@ class App_CRM_Integration {
 	public function add_settings_tab( $tabs ) {
 		$tabs['crm_integration'] = __( 'CRM Integration', 'appointments' );
 		return $tabs;
+	}
+
+	/**
+	 * Registriert Terminmanager im CRM Integrationen-Tab
+	 */
+	public function register_crm_accounting_integration( $integrations ) {
+		$integrations['terminmanager'] = array(
+			'name' => __( 'Terminmanager', 'appointments' ),
+			'description' => __( 'Synchronisiert Termine und Kundendaten mit PS Smart CRM.', 'appointments' ),
+			'plugin' => 'terminmanager/appointments.php',
+			'icon' => 'glyphicon glyphicon-calendar',
+			'status' => 'available',
+			'fields' => array(),
+		);
+
+		return $integrations;
+	}
+
+	/**
+	 * Zeigt Rücklinks aus dem CRM-Kundenformular in den Terminmanager
+	 */
+	public function render_crm_customer_backlinks( $email = '' ) {
+		$crm_customer_id = isset( $_REQUEST['ID'] ) ? absint( $_REQUEST['ID'] ) : 0;
+		if ( ! $crm_customer_id ) {
+			return;
+		}
+
+		$wp_user_id = $this->get_wp_user_id_by_crm_customer( $crm_customer_id, $email );
+		if ( ! $wp_user_id ) {
+			return;
+		}
+
+		echo '<a href="' . esc_url( admin_url( 'user-edit.php?user_id=' . $wp_user_id ) ) . '" class="btn btn-default" style="margin-left:10px">';
+		echo '<i class="glyphicon glyphicon-user"></i> ' . esc_html__( 'WP-Profil', 'appointments' );
+		echo '</a>';
+		echo '<a href="' . esc_url( admin_url( 'admin.php?page=appointments' ) ) . '" class="btn btn-default" style="margin-left:6px">';
+		echo '<i class="glyphicon glyphicon-calendar"></i> ' . esc_html__( 'Terminmanager', 'appointments' );
+		echo '</a>';
+	}
+
+	/**
+	 * Baut eine markierte Scheduler-Notiz für Quellen-Filter im CRM
+	 */
+	private function build_scheduler_note( $app_id, $note = '' ) {
+		$prefix = sprintf( '[Terminmanager #%d]', absint( $app_id ) );
+		$note = trim( (string) $note );
+
+		if ( '' === $note ) {
+			return $prefix;
+		}
+
+		if ( false !== strpos( $note, '[Terminmanager #' ) ) {
+			return $note;
+		}
+
+		return $prefix . "\n" . $note;
+	}
+
+	/**
+	 * Ermittelt WordPress User-ID über CRM-Kunde
+	 */
+	private function get_wp_user_id_by_crm_customer( $crm_customer_id, $email = '' ) {
+		$users = get_users( array(
+			'fields' => 'ID',
+			'number' => 1,
+			'meta_key' => '_app_crm_customer_id',
+			'meta_value' => $crm_customer_id,
+		) );
+
+		if ( ! empty( $users ) ) {
+			return absint( $users[0] );
+		}
+
+		if ( ! empty( $email ) ) {
+			$user = get_user_by( 'email', $email );
+			if ( $user ) {
+				return absint( $user->ID );
+			}
+		}
+
+		return 0;
 	}
 	
 	/**
