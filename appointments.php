@@ -1834,8 +1834,8 @@ if (!class_exists('Appointments')) {
 			);
 
 			if ( ! current_theme_supports( 'appointments_style' ) ) {
-				wp_enqueue_style( 'appointments', $this->plugin_url. '/css/front.css', array(), $this->version );
-				add_action( 'wp_head', array( &$this, 'wp_head' ) );
+			wp_enqueue_style( 'dashicons' );
+			wp_enqueue_style( 'appointments', $this->plugin_url. '/css/front.css', array( 'dashicons' ), $this->version );
 			}
 
 			do_action( 'app-scripts-general' );

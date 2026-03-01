@@ -1,7 +1,7 @@
 <?php
 
 /**
- * My appointments list.
+ * Meine Termine Liste.
  */
 class App_Shortcode_MyAppointments extends App_Shortcode {
 	public function __construct() {

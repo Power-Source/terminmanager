@@ -600,19 +600,34 @@ div.error p {
 
 /* tablesorter */
 table.tablesorter thead tr .header {
-    /*background-image: url(../images/bg.gif); No such thing*/
     background-repeat: no-repeat;
     background-position: center right;
     cursor: pointer;
+    position: relative;
+    padding-right: 20px;
 }
-table.tablesorter thead tr .headerSortUp {
-    /*background-image: url(../images/asc.gif); No such thing*/
+table.tablesorter thead tr .header::after {
+    content: "";
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid #999;
+    opacity: 0.3;
 }
-table.tablesorter thead tr .headerSortDown {
-    /*background-image: url(../images/desc.gif); No such thing*/
+table.tablesorter thead tr .headerSortUp::after {
+    border-top: 5px solid #333;
+    border-bottom: none;
+    opacity: 1;
 }
-table.tablesorter thead tr .headerSortDown, table.tablesorter thead tr .headerSortUp {
-    opacity: 0.5;
+table.tablesorter thead tr .headerSortDown::after {
+    border-top: none;
+    border-bottom: 5px solid #333;
+    opacity: 1;
 }
 
 .app-scheduled_appointment {

@@ -1,3 +1,50 @@
+/* Sortier-Indikatoren für Admin-Tabellen */
+.wp-list-table th.sortable a,
+.wp-list-table th.sorted a {
+	position: relative;
+	padding-right: 20px;
+}
+
+.wp-list-table .sorting-indicator {
+	display: inline-block;
+	width: 10px;
+	height: 4px;
+	margin-left: 7px;
+	vertical-align: middle;
+}
+
+.wp-list-table .sorting-indicator:before {
+	content: "\f142";
+	font: normal 20px/1 dashicons;
+	speak: never;
+	display: inline-block;
+	padding: 0;
+	top: -4px;
+	left: -8px;
+	line-height: 10px;
+	position: relative;
+	vertical-align: top;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	text-decoration: none;
+	color: #b4b9be;
+}
+
+.wp-list-table th.sorted.asc .sorting-indicator:before {
+	content: "\f142";
+	color: #2271b1;
+}
+
+.wp-list-table th.sorted.desc .sorting-indicator:before {
+	content: "\f140";
+	color: #2271b1;
+}
+
+.wp-list-table th.sortable:hover .sorting-indicator:before,
+.wp-list-table th.sorted:hover .sorting-indicator:before {
+	color: #2271b1;
+}
+
 .app-column-service, .app-column-worker, .app-column-status{
 width:15%;
 }

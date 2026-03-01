@@ -3,13 +3,17 @@
 class Appointments_Admin_Dashboard_Widget {
 
 	public function __construct() {
-		add_action( 'wp_dashboard_setup', array( $this, 'register' ) );
+		// Widget deaktiviert - Funktionalität ist jetzt im "Meine Termine" Widget integriert
+		// add_action( 'wp_dashboard_setup', array( $this, 'register' ) );
 	}
 
 	public function register() {
+		// Nicht mehr verwendet - siehe App_my_appointments_dashboard_widget
+		/*
 		if ( App_Roles::current_user_can( 'manage_options', App_Roles::CTX_DASHBOARD ) ) {
 			wp_add_dashboard_widget( 'appointments', __( 'Terminmanager', 'appointments' ), array( $this, 'render' ) );
 		}
+		*/
 	}
 
 	public function render() {
