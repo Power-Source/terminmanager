@@ -3,6 +3,7 @@
 class App_MP_Bridge_Legacy {
 
 	private $_core;
+	private $mp_posts = array();
 
 	private function __construct () {
 		global $appointments;
