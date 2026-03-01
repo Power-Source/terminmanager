@@ -94,6 +94,11 @@ if (!class_exists('Appointments')) {
                 include_once(appointments_plugin_dir() . 'includes/pro/class-app-pro.php');
                 $this->pro = new Appointments_Pro();
             }
+            
+            // PS Smart CRM Integration
+            if (file_exists(appointments_plugin_dir() . 'includes/integration/ps-smart-crm/class-app-crm-integration.php')) {
+                include_once(appointments_plugin_dir() . 'includes/integration/ps-smart-crm/class-app-crm-integration.php');
+            }
 
             $this->timetables = get_transient('app_timetables');
             if (!$this->timetables || !is_array($this->timetables)) {
