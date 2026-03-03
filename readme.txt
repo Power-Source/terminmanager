@@ -2,7 +2,8 @@
 Contributors: DerN3rd (PSOURCE)
 Tags: termine, buchung, appointments
 Requires at least: 4.9
-Tested up to: WordPress 6.8.1, ClassicPress 2.6.0
+Tested up to: 6.8.1 
+ClassicPress 2.6.0
 Stable tag: 1.0.1
 Requires PHP: 7.2
 License: GPLv2 or later
