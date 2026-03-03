@@ -3,7 +3,7 @@
 Plugin Name: Terminmanager
 Description: Ermöglicht das Akzeptieren von Terminen vom Frontend und das Verwalten oder Erstellen von Terminen vom Administrator aus.
 Plugin URI: https://power-source.github.io/terminmanager/
-Version: 1.1.7
+Version: 1.0.1
 Author: PSOURCE
 Author URI: https://github.com/cp-psource
 Textdomain: appointments
@@ -11,7 +11,7 @@ Textdomain: appointments
 */
 
 /*
-Copyright 2020-2025 PSOURCE (https://github.com/cp-psource)
+Copyright 2020-2026 PSOURCE (https://github.com/cp-psource)
 Author - DerN3rd
 
 This program is free software; you can redistribute it and/or modify it under
@@ -32,7 +32,7 @@ if (!class_exists('Appointments')) {
 
 	class Appointments {
 
-		public $version = '1.1.7';
+		public $version = '1.0.1';
 		public $db_version;
 	
 		public $timetables = array();

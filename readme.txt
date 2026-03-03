@@ -3,7 +3,7 @@ Contributors: DerN3rd (PSOURCE)
 Tags: termine, buchung, appointments
 Requires at least: 4.9
 Tested up to: WordPress 6.8.1, ClassicPress 2.6.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires PHP: 7.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
@@ -88,6 +88,10 @@ keine Einrichtung erforderlich. Wir haben auch die Google Kalender-API integrier
 Konfiguriere Terminmanager ganz einfach, um Änderungen an Terminen automatisch zwischen Google Kalender und Deiner Webseite zu synchronisieren.
 
 == ChangeLog ==
+
+= 1.0.1 =
+* Bugfixes und kleinere Verbesserungen.
+* Kompatibilität mit PS Smart CRM verbessert
 
 = 1.0.0 =
 * Initial release
