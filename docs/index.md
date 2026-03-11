@@ -6,8 +6,8 @@ title: "PS Terminmanager"
 <h2 align="center" style="color:#38c2bb;">📚 PS Terminmanager</h2>
 
 <div class="menu">
-  <a href="https://github.com/cp-psource/terminmanager-pro/discussions" style="color:#38c2bb;">💬 Forum</a>
-  <a href="https://github.com/cp-psource/terminmanager-pro/releases" style="color:#38c2bb;">📝 Download</a>
+  <a href="https://github.com/Power-Source/terminmanager-pro/discussions" style="color:#38c2bb;">💬 Forum</a>
+  <a href="https://github.com/Power-Source/terminmanager-pro/releases" style="color:#38c2bb;">📝 Download</a>
 </div>
 
 
