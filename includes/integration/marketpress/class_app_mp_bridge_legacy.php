@@ -16,7 +16,9 @@ class App_MP_Bridge_Legacy {
 	}
 
 	private function _add_hooks () {
-		add_action('manage_posts_custom_column', array($this, 'edit_products_custom_columns'), 1);
+		add_action('manage_product_posts_custom_column', array($this, 'edit_products_custom_columns'), 1, 2);
+		add_action('manage_mp_product_posts_custom_column', array($this, 'edit_products_custom_columns'), 1, 2);
+		add_action( 'current_screen', array( $this, 'replace_marketpress_product_column_hooks' ), 99 );
 		add_action('wp_ajax_nopriv_mp-update-cart', array($this, 'pre_update_cart'), 1);
 		add_action('wp_ajax_mp-update-cart', array($this, 'pre_update_cart'), 1);
 		add_action('wp', array($this, 'remove_from_cart_manual'), 1);
@@ -99,21 +101,57 @@ class App_MP_Bridge_Legacy {
 	}
 
 	/**
+	 * Replace the native MarketPress product column renderer with the bridge
+	 * renderer so we can selectively hide columns for appointment products
+	 * without mutating hook state while the table is rendering.
+	 */
+	public function replace_marketpress_product_column_hooks() {
+		if ( ! is_admin() ) {
+			return;
+		}
+
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || ( 'edit-product' !== $screen->id && 'product' !== $screen->post_type ) ) {
+			return;
+		}
+
+		if ( class_exists( 'MP_Products_Screen' ) ) {
+			$callback = array( MP_Products_Screen::get_instance(), 'product_columns_content' );
+			remove_action( 'manage_product_posts_custom_column', $callback, 10 );
+			remove_action( 'manage_mp_product_posts_custom_column', $callback, 10 );
+		}
+	}
+
+	/**
 	 * Hide column details for A+ products
 	 * @Since 1.0.1
 	 */
-	function edit_products_custom_columns( $column ) {
-		global $post, $mp;
-		if (!$this->is_app_mp_page($post)) return;
-		$hook = version_compare($mp->version, '2.8.8', '<')
-			? 'manage_posts_custom_column'
-			: 'manage_product_posts_custom_column'
-		;
-		if ('variations' == $column || 'sku' == $column || 'pricing' == $column) {
-			remove_action($hook, array($mp, 'edit_products_custom_columns'));
+	function edit_products_custom_columns( $column, $post_id = 0 ) {
+		static $rendered_cells = array();
+		global $post;
+
+		$current_post = $post_id ? get_post( $post_id ) : $post;
+		if ( ! is_object( $current_post ) || empty( $current_post->post_type ) || 'product' !== $current_post->post_type ) {
+			return;
+		}
+
+		$cell_key = $current_post->ID . ':' . $column;
+		if ( isset( $rendered_cells[ $cell_key ] ) ) {
+			return;
+		}
+		$rendered_cells[ $cell_key ] = true;
+
+		$legacy_columns = array( 'variations' );
+		$current_columns = array( 'product_variations' );
+
+		if ( $this->is_app_mp_page( $current_post ) && in_array( $column, array_merge( $legacy_columns, $current_columns ), true ) ) {
 			echo '-';
-		} else {
-			add_action($hook, array($mp, 'edit_products_custom_columns'));
+			return;
+		}
+
+		if ( class_exists( 'MP_Products_Screen' ) ) {
+			MP_Products_Screen::get_instance()->product_columns_content( $column, (int) $current_post->ID );
+			return;
 		}
 	}
 
